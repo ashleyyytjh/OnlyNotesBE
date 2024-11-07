@@ -130,7 +130,7 @@ public class NotesServiceImpl implements NotesService {
             logger.warn(String.format("Notes with id %s not found", notesId));
             return new NotesNotFoundException(notesId);
         });
-        if (notes.getFkAccountOwner().equals(ownerId)) {
+        if (!notes.getFkAccountOwner().equals(ownerId)) {
             logger.warn("User is not permitted to complete the following action.");
             throw new ForbiddenException();
         }
@@ -139,19 +139,19 @@ public class NotesServiceImpl implements NotesService {
 
     private Notes getNotesFromUpdateRequest(Notes notes, UpdateNotesRequest request) {
         if (request.getTitle() != null && !notes.getTitle().equals(request.getTitle())) {
-            logger.info("Update Notes 'title': %s", request.getTitle());
+            logger.info(String.format("Update Notes 'title': %s", request.getTitle()));
             notes.setTitle(request.getTitle());
         }
         if (request.getDescription() != null && !notes.getDescription().equals(request.getDescription())) {
-            logger.info("Update Notes 'description': %s", request.getDescription());
+            logger.info(String.format("Update Notes 'description': %s", request.getDescription()));
             notes.setDescription(request.getDescription());
         }
         if (request.getCategoryCode() != null && !notes.getCategoryCode().equals(request.getCategoryCode())) {
-            logger.info("Update Notes 'categoryCode': %s", request.getCategoryCode());
+            logger.info(String.format("Update Notes 'categoryCode': %s", request.getCategoryCode()));
             notes.setCategoryCode(request.getCategoryCode());
         }
         if (request.getPrice() != null && !notes.getPrice().equals(request.getPrice())) {
-            logger.info("Update Notes 'price': %s", request.getPrice());
+            logger.info(String.format("Update Notes 'price': %s", request.getPrice()));
             notes.setPrice(request.getPrice());
         }
         return notes;
@@ -168,7 +168,7 @@ public class NotesServiceImpl implements NotesService {
     @Override
     public Response deleteNotes(String fkAccountOwner, String id) {
         Notes notes = validateNotesAndOwner(fkAccountOwner, id);
-        // Delete notes from S3
+        storageService.deleteFile(fkAccountOwner, notes.getUrl());
         notesRepository.delete(notes);
         return SingleNotesResponse.builder().response(notes).build();
     }

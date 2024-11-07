@@ -7,6 +7,7 @@ import cs302.notes.data.response.MultiStringResponse;
 import cs302.notes.data.response.Response;
 import cs302.notes.data.response.SingleNotesResponse;
 import cs302.notes.exceptions.ForbiddenException;
+import cs302.notes.exceptions.InvalidPageableException;
 import cs302.notes.exceptions.NotesNotFoundException;
 import cs302.notes.models.ListingStatus;
 import cs302.notes.models.Notes;
@@ -54,6 +55,10 @@ public class NotesServiceImpl implements NotesService {
 
     @Override
     public Response getAllNotesByAccountId(String account_num, int pageNum, int limit) {
+        if (pageNum < 0 || limit < 1) {
+            logger.warn("Page number / limit cannot be less than 0.");
+            throw new InvalidPageableException();
+        }
         Pageable paging = PageRequest.of(pageNum, limit);
         Page<Notes> page = notesRepository.findByFkAccountOwnerOrderByStatus(account_num, paging);
         return MultiNotesResponse.builder()
@@ -66,6 +71,10 @@ public class NotesServiceImpl implements NotesService {
 
     @Override
     public Response getAllNotesByStatusIn(List<String> status, int pageNum, int limit) {
+        if (pageNum < 0 || limit < 1) {
+            logger.warn("Page number / limit cannot be less than 0.");
+            throw new InvalidPageableException();
+        }
         Pageable paging = PageRequest.of(pageNum, limit);
         Page<Notes> page = notesRepository.findByStatusIn(status, paging);
         return MultiNotesResponse.builder()
@@ -78,6 +87,10 @@ public class NotesServiceImpl implements NotesService {
 
     @Override
     public Response getAllNotesByCategoryCodeAndStatusIn(String categoryCode, List<String> status, int pageNum, int limit) {
+        if (pageNum < 0 || limit < 1) {
+            logger.warn("Page number / limit cannot be less than 0.");
+            throw new InvalidPageableException();
+        }
         Pageable paging = PageRequest.of(pageNum, limit);
         Page<Notes> page = notesRepository.findByStatusInAndCategoryCode(status, categoryCode, paging);
         return MultiNotesResponse.builder()

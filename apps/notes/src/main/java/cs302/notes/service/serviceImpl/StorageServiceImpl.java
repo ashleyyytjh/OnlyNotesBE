@@ -38,7 +38,6 @@ public class StorageServiceImpl implements StorageService {
     public void deleteFile(String clientId, String url) throws InternalServerError {
         try {
             String path = new URL(url).getPath();
-            System.out.println(path);
             DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
                     .bucket(bucketName)
                     .key(path)
@@ -101,7 +100,6 @@ public class StorageServiceImpl implements StorageService {
         // Obtain url from s3
         GetUrlRequest request = GetUrlRequest.builder().bucket(bucketName ).key(key).build();
         String url = s3Client.utilities().getUrl(request).toExternalForm();
-        System.out.println(url);
 
         // Return secure filename
         return url;

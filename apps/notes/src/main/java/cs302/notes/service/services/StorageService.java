@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public interface StorageService {
+    void deleteFile(String clientId, String url) throws InternalServerError;
     void deleteAllFiles(String clientId) throws InternalServerError;
     String uploadFile(MultipartFile file, String fkAccountOwner);
 }

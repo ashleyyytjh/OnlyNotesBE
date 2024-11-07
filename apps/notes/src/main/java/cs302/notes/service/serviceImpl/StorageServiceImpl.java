@@ -16,6 +16,7 @@ import software.amazon.awssdk.services.s3.model.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -32,6 +33,22 @@ public class StorageServiceImpl implements StorageService {
     public StorageServiceImpl(AcceptedValues acceptedValues, S3Client s3Client) {
         this.ACCEPTED_FILE_EXTENSIONS = acceptedValues.getMediaList();
         this.s3Client = s3Client;
+    }
+
+    public void deleteFile(String clientId, String url) throws InternalServerError {
+        try {
+            String path = new URL(url).getPath();
+            System.out.println(path);
+            DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(path)
+                    .build();
+            logger.info(String.format("Storage Service deleted %s.", path));
+            s3Client.deleteObject(deleteRequest);
+        } catch (Exception e) {
+            logger.warn(String.format("Internal Server Error when deleting file: %s", e.getMessage()));
+            throw new InternalServerError(e.getMessage());
+        }
     }
 
     @Override
@@ -56,7 +73,7 @@ public class StorageServiceImpl implements StorageService {
                 }
             }
         } catch (Exception e) {
-            logger.warn(String.format("Internal Server Error when deleting file: ", e.getMessage()));
+            logger.warn(String.format("Internal Server Error when deleting file: %s", e.getMessage()));
             throw new InternalServerError(e.getMessage());
         }
     }
@@ -65,22 +82,29 @@ public class StorageServiceImpl implements StorageService {
     public String uploadFile(MultipartFile file, String clientId) throws InternalServerError {
         String secureFileName = getSecureFileName(file.getOriginalFilename());
         File convertedFile = convertMultiPartFileToFile(file, secureFileName);
+        String key = clientId + "/" + System.currentTimeMillis() + "_" + secureFileName;
 
         try {
             // Puts object in the uploadFile
             PutObjectRequest request = PutObjectRequest.builder()
                     .bucket(bucketName)
-                    .key(clientId + "/" + System.currentTimeMillis() + "_" + secureFileName)
+                    .key(key)
                     .build();
             s3Client.putObject(request, Path.of(convertedFile.toURI()));
             convertedFile.delete();
         } catch (Exception e) {
             convertedFile.delete();
-            logger.warn(String.format("Internal Server Error when deleting file: ", e.getMessage()));
+            logger.warn(String.format("Internal Server Error when uploading file: %s", e.getMessage()));
             throw new InternalServerError(e.getMessage());
         }
+
+        // Obtain url from s3
+        GetUrlRequest request = GetUrlRequest.builder().bucket(bucketName ).key(key).build();
+        String url = s3Client.utilities().getUrl(request).toExternalForm();
+        System.out.println(url);
+
         // Return secure filename
-        return secureFileName;
+        return url;
     }
 
     private String getSecureFileName(String originalFilename) {

@@ -24,12 +24,15 @@ notes-tests:
  before_script:
    - cd ./apps/notes
  script:
-   - mvn clean install
- allow_failure: false
+   - mvn verify
  artifacts:
    when: always
    paths:
      - coverage/
+   reports:
+     junit:
+       - target/surefire-reports/TEST-*.xml
+       - target/failsafe-reports/TEST-*.xml
 
 # Build Docker Image
 notes-build:

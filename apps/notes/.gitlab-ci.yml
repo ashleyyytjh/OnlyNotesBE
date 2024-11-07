@@ -20,7 +20,7 @@ include:
 
 notes-tests:
  stage: test
- image: node:20-slim
+ image: maven:3-jdk-10
  before_script:
    - cd ./apps/notes
  script:

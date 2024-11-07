@@ -18,6 +18,20 @@ include:
   - template: Jobs/Container-Scanning.gitlab-ci.yml
   - template: Jobs/SAST.gitlab-ci.yml
 
+account-unit-tests:
+  stage: test
+  image: node:20-slim
+  before_script:
+    - cd ./apps/account
+    - npm install
+  script:
+    - npm run test:unit
+  allow_failure: true
+  artifacts:
+    when: always
+    paths:
+      - coverage/
+
 # Build Docker Image
 account-build:
   image: docker:20.10.16

@@ -9,7 +9,6 @@ import cs302.notes.exceptions.ForbiddenException;
 import cs302.notes.exceptions.NotesNotFoundException;
 import cs302.notes.models.ListingStatus;
 import cs302.notes.models.Notes;
-import cs302.notes.producer.MessageSender;
 import cs302.notes.repository.NotesRepository;
 import cs302.notes.service.services.NotesService;
 import cs302.notes.service.services.StorageService;

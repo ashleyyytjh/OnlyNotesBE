@@ -1,8 +1,7 @@
-package cs302.notes.consumer;
+package cs302.notes.service.serviceImpl;
 
 import cs302.notes.models.*;
 import cs302.notes.exceptions.NotesNotFoundException;
-import cs302.notes.producer.MessageSender;
 import cs302.notes.repository.NotesRepository;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;

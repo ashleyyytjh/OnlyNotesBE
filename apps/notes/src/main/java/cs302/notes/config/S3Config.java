@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
-public class StorageConfig {
+public class S3Config {
 
     @Value("${aws.region}")
     private String region;

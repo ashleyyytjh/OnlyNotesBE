@@ -1,4 +1,4 @@
-package cs302.notes.producer;
+package cs302.notes.service.serviceImpl;
 
 import cs302.notes.models.ListingStatus;
 import cs302.notes.models.OrderCreated;

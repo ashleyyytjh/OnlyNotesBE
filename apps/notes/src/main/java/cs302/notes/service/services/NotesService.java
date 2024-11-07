@@ -1,6 +1,7 @@
 package cs302.notes.service.services;
 
-import cs302.notes.data.request.NotesRequest;
+import cs302.notes.data.request.CreateNotesRequest;
+import cs302.notes.data.request.UpdateNotesRequest;
 import cs302.notes.data.response.Response;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +14,7 @@ public interface NotesService {
     Response getAllNotesByStatusIn(List<String> status, int pageNum, int limit);
     Response getAllNotesByCategoryCodeAndStatusIn(String categoryCode, List<String> status, int pageNum, int limit);
     Response getAllDistinctCategories();
-    Response createNotes(NotesRequest request);
-    Response replaceNotes(String fkAccountOwner, String id, NotesRequest request);
+    Response createNotes(CreateNotesRequest request, String fkAccountOwner);
+    Response updateNotes(String id, String notesId, UpdateNotesRequest request);
     Response deleteNotes(String fkAccountOwner, String id);
 }

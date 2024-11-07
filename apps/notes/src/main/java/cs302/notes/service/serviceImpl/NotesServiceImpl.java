@@ -1,6 +1,7 @@
 package cs302.notes.service.serviceImpl;
 
-import cs302.notes.data.request.NotesRequest;
+import cs302.notes.data.request.CreateNotesRequest;
+import cs302.notes.data.request.UpdateNotesRequest;
 import cs302.notes.data.response.MultiNotesResponse;
 import cs302.notes.data.response.MultiStringResponse;
 import cs302.notes.data.response.Response;
@@ -93,13 +94,25 @@ public class NotesServiceImpl implements NotesService {
         return MultiStringResponse.builder().response(categories).build();
     }
 
+    private Notes getNotesFromCreateRequest(CreateNotesRequest request, String fkAccountOwner) {
+        return Notes.builder()
+                .fkAccountOwner(fkAccountOwner)
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .url(request.getUrl())
+                .categoryCode(request.getCategoryCode())
+                .price(request.getPrice())
+                .status("Pending")
+                .build();
+    }
+
     @Override
-    public Response createNotes(NotesRequest request) {
+    public Response createNotes(CreateNotesRequest request, String fkAccountOwner) {
         // Uncomment once testing is done
-        String s3Url = storageService.uploadFile(request.getFile(), request.getFkAccountOwner());
+        String s3Url = storageService.uploadFile(request.getFile(), fkAccountOwner);
         // Hardcoded
         request.setUrl(s3Url);
-        Notes notes = new Notes(request, "Pending");
+        Notes notes = getNotesFromCreateRequest(request, fkAccountOwner);
         Notes createdNotes = notesRepository.insert(notes);
         // Send notes to listing uploaded channel
         messageSender.publishListingUploaded(ListingStatus.builder()
@@ -112,22 +125,6 @@ public class NotesServiceImpl implements NotesService {
         return SingleNotesResponse.builder().response(createdNotes).build();
     }
 
-    @Override
-    public Response replaceNotes(String fkAccountOwner, String id, NotesRequest request) {
-        Notes foundNotes = validateNotesAndOwner(fkAccountOwner, id);
-        Notes notes = new Notes(request, foundNotes.getStatus());
-        notes.set_id(id);
-        notesRepository.save(notes);
-        return SingleNotesResponse.builder().response(notes).build();
-    }
-
-    @Override
-    public Response deleteNotes(String fkAccountOwner, String id) {
-        Notes notes = validateNotesAndOwner(fkAccountOwner, id);
-        notesRepository.delete(notes);
-        return SingleNotesResponse.builder().response(notes).build();
-    }
-
     private Notes validateNotesAndOwner(String ownerId,String notesId) throws ForbiddenException, NotesNotFoundException {
         Notes notes = notesRepository.findBy_id(notesId).orElseThrow(() -> {
             logger.warn(String.format("Notes with id %s not found", notesId));
@@ -138,5 +135,41 @@ public class NotesServiceImpl implements NotesService {
             throw new ForbiddenException();
         }
         return notes;
+    }
+
+    private Notes getNotesFromUpdateRequest(Notes notes, UpdateNotesRequest request) {
+        if (request.getTitle() != null && !notes.getTitle().equals(request.getTitle())) {
+            logger.info("Update Notes 'title': %s", request.getTitle());
+            notes.setTitle(request.getTitle());
+        }
+        if (request.getDescription() != null && !notes.getDescription().equals(request.getDescription())) {
+            logger.info("Update Notes 'description': %s", request.getDescription());
+            notes.setDescription(request.getDescription());
+        }
+        if (request.getCategoryCode() != null && !notes.getCategoryCode().equals(request.getCategoryCode())) {
+            logger.info("Update Notes 'categoryCode': %s", request.getCategoryCode());
+            notes.setCategoryCode(request.getCategoryCode());
+        }
+        if (request.getPrice() != null && !notes.getPrice().equals(request.getPrice())) {
+            logger.info("Update Notes 'price': %s", request.getPrice());
+            notes.setPrice(request.getPrice());
+        }
+        return notes;
+    }
+
+    @Override
+    public Response updateNotes(String fkAccountOwner, String notesId, UpdateNotesRequest request) {
+        Notes foundNotes = validateNotesAndOwner(fkAccountOwner, notesId);
+        Notes updatedNotes = getNotesFromUpdateRequest(foundNotes, request);
+        Notes savedNotes = notesRepository.save(updatedNotes);
+        return SingleNotesResponse.builder().response(savedNotes).build();
+    }
+
+    @Override
+    public Response deleteNotes(String fkAccountOwner, String id) {
+        Notes notes = validateNotesAndOwner(fkAccountOwner, id);
+        // Delete notes from S3
+        notesRepository.delete(notes);
+        return SingleNotesResponse.builder().response(notes).build();
     }
 }

@@ -3,12 +3,14 @@ package cs302.notes.controller;
 import cs302.notes.data.response.ErrorResponse;
 import cs302.notes.data.response.Response;
 import cs302.notes.exceptions.BadRequestException;
+import cs302.notes.exceptions.ForbiddenException;
 import cs302.notes.exceptions.InternalServerError;
 import cs302.notes.exceptions.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -44,6 +46,32 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ErrorResponse.builder()
                         .statusCode(400)
+                        .errors(errors)
+                        .build());
+    }
+
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(ServletRequestBindingException.class)
+    public ResponseEntity<Response> handleServletRequestBindingException(ServletRequestBindingException ex) {
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", "No user credentials were provided.");
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ErrorResponse.builder()
+                        .statusCode(401)
+                        .errors(errors)
+                        .build());
+    }
+
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<Response> handleForbiddenExceptions(ForbiddenException ex) {
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ErrorResponse.builder()
+                        .statusCode(403)
                         .errors(errors)
                         .build());
     }

@@ -4,43 +4,35 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
-import lombok.*;
-import org.hibernate.validator.constraints.URL;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @Builder
-public class NotesRequest {
+public class UpdateNotesRequest {
 
-    @JsonProperty("fkAccountOwner")
-    //fkAccountOwner stores the AWS cognito user id
-    private String fkAccountOwner;
-
-    @JsonProperty("title")
-    @NotEmpty @Size(min=1, max=50)
     //title stores the notes title to be displayed
+    @JsonProperty("title")
+    @Size(min=1, max=50, message="Title must be between 1-50 characters.")
     private String title;
 
-    @JsonProperty("description")
-    @NotEmpty @Size(min=1, max=300)
     //description stores the string data describing the notes
+    @JsonProperty("description")
+    @Size(min=1, max=300, message="Description must be between 1-300 characters.")
     private String description;
 
-    @URL
-    //url stores the S3 bucket's URL
-    private String url;
-
-    private MultipartFile file;
-
-    @JsonProperty("categoryCode")
-    @NotEmpty @Size(min=1, max=50)
     //categoryCode stores the module number of the notes
+    @JsonProperty("categoryCode")
+    @Size(min=1, max=50, message = "Category Code must be between 1-50 characters")
     private String categoryCode;
 
-    @JsonProperty("price")
-    @Min(1)
     //price stores the notes' price in cents
+    @JsonProperty("price")
+    @Min(value = 0, message = "Price cannot be negative.")
     private Integer price;
 }

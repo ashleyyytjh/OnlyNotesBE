@@ -1,6 +1,5 @@
 package cs302.notes.models;
 
-import cs302.notes.data.request.NotesRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,17 +34,4 @@ public class Notes {
 
     //verified stores whether set of notes have been verified
     private String status;
-
-    /**
-     * Constructor for Notes from NotesRequest: Initialises all fields except _id and verified
-     */
-    public Notes(NotesRequest request, String status) {
-        this.fkAccountOwner = request.getFkAccountOwner();
-        this.title = request.getTitle();
-        this.description = request.getDescription();
-        this.url = request.getUrl();
-        this.categoryCode = request.getCategoryCode();
-        this.price = request.getPrice();
-        this.status = status;
-    }
 }

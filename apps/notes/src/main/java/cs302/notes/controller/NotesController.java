@@ -1,6 +1,7 @@
 package cs302.notes.controller;
 
-import cs302.notes.data.request.NotesRequest;
+import cs302.notes.data.request.CreateNotesRequest;
+import cs302.notes.data.request.UpdateNotesRequest;
 import cs302.notes.data.response.DefaultResponse;
 import cs302.notes.data.response.Response;
 import cs302.notes.service.services.NotesService;
@@ -61,10 +62,9 @@ public class NotesController {
     }
 
     @PostMapping(value = "${currentApiPrefix}/notes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Response> createNotes(@Valid @ModelAttribute NotesRequest request) {
-        String id = "123456";
-        request.setFkAccountOwner(id);
-        Response notesResponse = notesService.createNotes(request);
+    public ResponseEntity<Response> createNotes(@Valid @ModelAttribute CreateNotesRequest request,
+                                                @RequestAttribute("id") String id) {
+        Response notesResponse = notesService.createNotes(request, id);
         logger.info("POST /notes 201");
         return new ResponseEntity<>(notesResponse, HttpStatus.CREATED);
     }
@@ -77,10 +77,10 @@ public class NotesController {
     }
 
     @PutMapping("${currentApiPrefix}/notes/{notesId}")
-    public ResponseEntity<Response> replaceNotesById(@PathVariable("notesId") String notesId,
-                                                     @Valid @RequestBody NotesRequest request,
-                                                     @RequestAttribute("id") String id) {
-        Response response = notesService.replaceNotes(id, notesId, request);
+    public ResponseEntity<Response> updateNotesById(@PathVariable("notesId") String notesId,
+                                                    @Valid @RequestBody UpdateNotesRequest request,
+                                                    @RequestAttribute("id") String id) {
+        Response response = notesService.updateNotes(id, notesId, request);
         logger.info(String.format("PUT /notes/%s 200", notesId));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

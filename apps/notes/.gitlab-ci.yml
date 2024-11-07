@@ -22,9 +22,9 @@ notes-tests:
  stage: test
  image: node:20-slim
  before_script:
-   - cd ./apps/notes/src/test/java
+   - cd ./apps/notes
  script:
-   - mvn test
+   - mvn clean install
  allow_failure: false
  artifacts:
    when: always

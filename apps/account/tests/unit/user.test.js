@@ -9,6 +9,14 @@ jest.mock('aws-sdk', () => {
   return { CognitoIdentityServiceProvider: jest.fn(() => CognitoIdentityServiceProvider) };
 });
 
+beforeAll(() => {
+  console.error = jest.fn(); 
+});
+
+afterAll(() => {
+  console.error.mockRestore(); 
+});
+
 describe('retrieveUser', () => {
   beforeEach(() => {
     AWS.CognitoIdentityServiceProvider().listUsers.mockClear();

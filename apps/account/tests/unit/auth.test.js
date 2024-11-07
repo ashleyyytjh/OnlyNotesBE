@@ -12,10 +12,12 @@ describe('Auth functions', () => {
       'cognito_client-secret': 'testClientSecret',
       cognito_callback_url: 'https://callback.example.com',
     };
+    console.error = jest.fn();
   });
 
   afterAll(() => {
     process.env = originalEnv;
+    console.error.mockRestore();
   });
 
   beforeEach(() => {

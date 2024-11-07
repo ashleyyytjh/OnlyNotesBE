@@ -18,21 +18,18 @@ include:
   - template: Jobs/Container-Scanning.gitlab-ci.yml
   - template: Jobs/SAST.gitlab-ci.yml
 
-# notes-unit-tests:
-#   stage: test
-#   image: node:20-slim
-#   before_script:
-#     - cd ./apps/notes
-#     - npm install
-#   script:
-#     - npm run test:unit
-#   allow_failure: true
-#   artifacts:
-#     when: always
-#     paths:
-#       - coverage/
-#   variables:
-#     STRIPE_SECRET_KEY: $STRIPE_SECRET_KEY
+notes-tests:
+ stage: test
+ image: node:20-slim
+ before_script:
+   - cd ./apps/notes/src/test/java
+ script:
+   - mvn test
+ allow_failure: false
+ artifacts:
+   when: always
+   paths:
+     - coverage/
 
 # Build Docker Image
 notes-build:

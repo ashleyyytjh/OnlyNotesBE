@@ -138,7 +138,7 @@ public class NotesServiceImpl implements NotesService {
         return SingleNotesResponse.builder().response(createdNotes).build();
     }
 
-    private Notes validateNotesAndOwner(String ownerId,String notesId) throws ForbiddenException, NotesNotFoundException {
+    private Notes validateNotesAndOwner(String ownerId, String notesId) throws ForbiddenException, NotesNotFoundException {
         Notes notes = notesRepository.findBy_id(notesId).orElseThrow(() -> {
             logger.warn(String.format("Notes with id %s not found", notesId));
             return new NotesNotFoundException(notesId);

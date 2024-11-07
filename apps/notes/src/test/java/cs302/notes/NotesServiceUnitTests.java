@@ -40,7 +40,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class NotesServiceUnitTests {
+public class NotesServiceUnitTests {
     @Mock
     private NotesRepository notesRepository;
     @Mock
@@ -300,16 +300,20 @@ class NotesServiceUnitTests {
         verify(notesRepository).findDistinctCategoryCode();
     }
 
-    @Test
-    void createNotes_Successful_ReturnNotes() {
-        // Arrange
+    MultipartFile getMultiPartFile() {
         byte[] content = null;
         try {
             content = Files.readAllBytes(path);
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
-        MultipartFile multipartFile = new MockMultipartFile(testFileName, testFileName, "image/jpeg", content);
+        return new MockMultipartFile(testFileName, testFileName, "image/jpeg", content);
+    }
+
+    @Test
+    void createNotes_Successful_ReturnNotes() {
+        // Arrange
+        MultipartFile multipartFile = getMultiPartFile();
         CreateNotesRequest createRequest = new CreateNotesRequest("CS101 notes", "Take a step into programming fundamentals 1. Explore the world of C", "CS101", 500, multipartFile, null);
         when(storageService.uploadFile(multipartFile, fkAccountOwner)).thenReturn("https://only-notes-bucket.s3.ap-southeast-1.amazonaws.com/123456_1729680218630_EvenmoreExercisessolutions.pdf");
         when(notesRepository.insert(any(Notes.class))).thenReturn(mockNotes);
@@ -329,13 +333,7 @@ class NotesServiceUnitTests {
     @Test
     void createNotes_InternalServerError_ThrowException() {
         // Arrange
-        byte[] content = null;
-        try {
-            content = Files.readAllBytes(path);
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
-        MultipartFile multipartFile = new MockMultipartFile(testFileName, testFileName, "image/jpeg", content);
+        MultipartFile multipartFile = getMultiPartFile();
         CreateNotesRequest createRequest = new CreateNotesRequest("CS101 notes", "Take a step into programming fundamentals 1. Explore the world of C", "CS101", 500, multipartFile, null);
         when(storageService.uploadFile(multipartFile, fkAccountOwner)).thenThrow(new InternalServerError("Internal Server Error when uploading file"));
 

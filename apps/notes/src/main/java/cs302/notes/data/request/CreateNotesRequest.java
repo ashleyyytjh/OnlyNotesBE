@@ -17,19 +17,19 @@ public class CreateNotesRequest {
     //title stores the notes title to be displayed
     @JsonProperty("title")
     @NotEmpty(message = "Title cannot be empty.")
-    @Size(min=1, max=50, message="Title must be between 1-50 characters.")
+    @Size(max=50, message="Title must be between 1-50 characters.")
     private String title;
 
     //description stores the string data describing the notes
     @JsonProperty("description")
     @NotEmpty(message = "Description cannot be empty.")
-    @Size(min=1, max=300, message="Description must be between 1-300 characters.")
+    @Size(max=300, message="Description must be between 1-300 characters.")
     private String description;
 
     //categoryCode stores the module number of the notes
     @JsonProperty("categoryCode")
     @NotEmpty(message = "Category Code cannot be empty.")
-    @Size(min=1, max=50, message = "Category Code must be between 1-50 characters")
+    @Size(max=50, message = "Category Code must be between 1-50 characters.")
     private String categoryCode;
 
     //price stores the notes' price in cents

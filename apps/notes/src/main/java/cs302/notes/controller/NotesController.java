@@ -5,6 +5,8 @@ import cs302.notes.data.response.DefaultResponse;
 import cs302.notes.data.response.Response;
 import cs302.notes.service.services.NotesService;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,6 +18,7 @@ import java.util.List;
 @RestController
 public class NotesController {
 
+    private final Logger logger = LoggerFactory.getLogger(NotesController.class);
     private final NotesService notesService;
 
     //Setter Injection
@@ -26,12 +29,15 @@ public class NotesController {
 
     @GetMapping("${currentApiPrefix}/health")
     public ResponseEntity<Response> healthCheck() {
-        return new ResponseEntity<>(DefaultResponse.builder().message("Hello World!").build(), HttpStatus.OK);
+        Response response = DefaultResponse.builder().message("Hello World!").build();
+        logger.info("GET /health 200");
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("${currentApiPrefix}/notes/categories")
     public ResponseEntity<Response> getAllDistinctCategories() {
         Response response = notesService.getAllDistinctCategories();
+        logger.info("GET /notes/categories 200");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -40,6 +46,7 @@ public class NotesController {
                                                          @RequestParam(defaultValue = "10") int limit,
                                                          @RequestAttribute("id") String id) {
         Response response = notesService.getAllNotesByAccountId(id, page, limit);
+        logger.info("GET /notes/account 200");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -49,6 +56,7 @@ public class NotesController {
                                                         @RequestParam(defaultValue = "10") int limit) {
         Response response = "".equals(categoryCode) ? notesService.getAllNotesByStatusIn(List.of("Verified"), page, limit)
                 : notesService.getAllNotesByCategoryCodeAndStatusIn(categoryCode, List.of("Verified"), page, limit);
+        logger.info("GET /notes 200");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -57,12 +65,14 @@ public class NotesController {
         String id = "123456";
         request.setFkAccountOwner(id);
         Response notesResponse = notesService.createNotes(request);
+        logger.info("POST /notes 201");
         return new ResponseEntity<>(notesResponse, HttpStatus.CREATED);
     }
 
     @GetMapping("${currentApiPrefix}/notes/{notesId}")
     public ResponseEntity<Response> getNotesById(@PathVariable("notesId") String notesId) {
         Response response = notesService.getNotesById(notesId);
+        logger.info(String.format("GET /notes/%s 200", notesId));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -71,6 +81,7 @@ public class NotesController {
                                                      @Valid @RequestBody NotesRequest request,
                                                      @RequestAttribute("id") String id) {
         Response response = notesService.replaceNotes(id, notesId, request);
+        logger.info(String.format("PUT /notes/%s 200", notesId));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -78,6 +89,7 @@ public class NotesController {
     public ResponseEntity<Response> deleteNotesById(@PathVariable("notesId") String notesId,
                                                     @RequestAttribute("id") String id) {
         Response response = notesService.deleteNotes(id, notesId);
+        logger.info(String.format("DELETE /notes/%s 200", notesId));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

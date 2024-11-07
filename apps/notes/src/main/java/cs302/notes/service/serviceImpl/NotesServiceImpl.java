@@ -12,6 +12,8 @@ import cs302.notes.models.Notes;
 import cs302.notes.repository.NotesRepository;
 import cs302.notes.service.services.NotesService;
 import cs302.notes.service.services.StorageService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,6 +24,8 @@ import java.util.List;
 
 @Service
 public class NotesServiceImpl implements NotesService {
+
+    private final Logger logger = LoggerFactory.getLogger(NotesServiceImpl.class);
 
     private final NotesRepository notesRepository;
     private final MessageSender messageSender;
@@ -40,7 +44,10 @@ public class NotesServiceImpl implements NotesService {
      */
     @Override
     public Response getNotesById(String id) {
-        Notes notes = notesRepository.findBy_id(id).orElseThrow(() -> new NotesNotFoundException(id));
+        Notes notes = notesRepository.findBy_id(id).orElseThrow(() -> {
+            logger.warn(String.format("Notes with id %s not found", id));
+            return new NotesNotFoundException(id);
+        });
         return SingleNotesResponse.builder().response(notes).build();
     }
 
@@ -91,7 +98,6 @@ public class NotesServiceImpl implements NotesService {
         // Uncomment once testing is done
         String s3Url = storageService.uploadFile(request.getFile(), request.getFkAccountOwner());
         // Hardcoded
-//        String s3Url = "www.testingLink.com";
         request.setUrl(s3Url);
         Notes notes = new Notes(request, "Pending");
         Notes createdNotes = notesRepository.insert(notes);
@@ -108,8 +114,7 @@ public class NotesServiceImpl implements NotesService {
 
     @Override
     public Response replaceNotes(String fkAccountOwner, String id, NotesRequest request) {
-        Notes foundNotes = notesRepository.findBy_id(id).orElseThrow(() -> new NotesNotFoundException(id));
-        if (foundNotes.getFkAccountOwner().equals(fkAccountOwner)) { throw new ForbiddenException(); }
+        Notes foundNotes = validateNotesAndOwner(fkAccountOwner, id);
         Notes notes = new Notes(request, foundNotes.getStatus());
         notes.set_id(id);
         notesRepository.save(notes);
@@ -118,9 +123,20 @@ public class NotesServiceImpl implements NotesService {
 
     @Override
     public Response deleteNotes(String fkAccountOwner, String id) {
-        Notes notes = notesRepository.findBy_id(id).orElseThrow(() -> new NotesNotFoundException(id));
-        if (notes.getFkAccountOwner().equals(fkAccountOwner)) { throw new ForbiddenException(); }
+        Notes notes = validateNotesAndOwner(fkAccountOwner, id);
         notesRepository.delete(notes);
         return SingleNotesResponse.builder().response(notes).build();
+    }
+
+    private Notes validateNotesAndOwner(String ownerId,String notesId) throws ForbiddenException, NotesNotFoundException {
+        Notes notes = notesRepository.findBy_id(notesId).orElseThrow(() -> {
+            logger.warn(String.format("Notes with id %s not found", notesId));
+            return new NotesNotFoundException(notesId);
+        });
+        if (notes.getFkAccountOwner().equals(ownerId)) {
+            logger.warn("User is not permitted to complete the following action.");
+            throw new ForbiddenException();
+        }
+        return notes;
     }
 }

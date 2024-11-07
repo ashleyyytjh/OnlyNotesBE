@@ -1,15 +1,15 @@
 package cs302.notes.config;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentials;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
 
 @Configuration
 public class S3Config {
@@ -19,19 +19,20 @@ public class S3Config {
 
     @Bean
     @Profile("dev")
-    public AmazonS3 generateS3Client(@Value("${aws.accessKeyId}") String accessKey, @Value("${aws.secretKey}") String secretKey) {
-        AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
-        return AmazonS3ClientBuilder.standard()
-                .withCredentials(new AWSStaticCredentialsProvider(credentials))
-                .withRegion(region).build();
+    public S3Client generateS3ClientDev(@Value("${aws.accessKeyId}") String accessKey, @Value("${aws.secretKey}") String secretKey) {
+        AwsCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
+        return S3Client.builder()
+                .credentialsProvider(StaticCredentialsProvider.create(credentials))
+                .region(Region.of(region))
+                .build();
     }
 
     @Bean
     @Profile({"prod", "default"})
-    public AmazonS3 generateS3ClientProd() {
-        return AmazonS3ClientBuilder.standard()
-                .withCredentials(new DefaultAWSCredentialsProviderChain())
-                .withRegion(region)
+    public S3Client generateS3ClientProd() {
+        return S3Client.builder()
+                .credentialsProvider(DefaultCredentialsProvider.builder().build())
+                .region(Region.of(region))
                 .build();
     }
 }

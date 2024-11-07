@@ -48,7 +48,7 @@ public class NotesServiceImpl implements NotesService {
     @Override
     public Response getAllNotesByAccountId(String account_num, int pageNum, int limit) {
         Pageable paging = PageRequest.of(pageNum, limit);
-        Page page = notesRepository.findByFkAccountOwnerOrderByStatus(account_num, paging);
+        Page<Notes> page = notesRepository.findByFkAccountOwnerOrderByStatus(account_num, paging);
         return MultiNotesResponse.builder()
                 .totalItems(page.getTotalElements())
                 .response(page.getContent())
@@ -60,7 +60,7 @@ public class NotesServiceImpl implements NotesService {
     @Override
     public Response getAllNotesByStatusIn(List<String> status, int pageNum, int limit) {
         Pageable paging = PageRequest.of(pageNum, limit);
-        Page page = notesRepository.findByStatusIn(status, paging);
+        Page<Notes> page = notesRepository.findByStatusIn(status, paging);
         return MultiNotesResponse.builder()
                 .totalItems(page.getTotalElements())
                 .response(page.getContent())
@@ -72,7 +72,7 @@ public class NotesServiceImpl implements NotesService {
     @Override
     public Response getAllNotesByCategoryCodeAndStatusIn(String categoryCode, List<String> status, int pageNum, int limit) {
         Pageable paging = PageRequest.of(pageNum, limit);
-        Page page = notesRepository.findByStatusInAndCategoryCode(status, categoryCode, paging);
+        Page<Notes> page = notesRepository.findByStatusInAndCategoryCode(status, categoryCode, paging);
         return MultiNotesResponse.builder()
                 .totalItems(page.getTotalElements())
                 .response(page.getContent())

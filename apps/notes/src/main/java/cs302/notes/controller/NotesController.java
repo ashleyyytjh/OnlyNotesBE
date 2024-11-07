@@ -11,18 +11,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1")
 public class NotesController {
 
     private final NotesService notesService;
-    private static final Logger logger = LoggerFactory.getLogger(NotesController.class);
-
 
     //Setter Injection
     @Autowired
@@ -30,18 +24,18 @@ public class NotesController {
         this.notesService = notesService;
     }
 
-    @GetMapping("")
+    @GetMapping("${currentApiPrefix}/health")
     public ResponseEntity<Response> healthCheck() {
         return new ResponseEntity<>(DefaultResponse.builder().message("Hello World!").build(), HttpStatus.OK);
     }
 
-    @GetMapping("/notes/categories")
+    @GetMapping("${currentApiPrefix}/notes/categories")
     public ResponseEntity<Response> getAllDistinctCategories() {
         Response response = notesService.getAllDistinctCategories();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/notes/account")
+    @GetMapping("${currentApiPrefix}/notes/account")
     public ResponseEntity<Response> getAllNotesByAccount(@RequestParam(defaultValue = "0") int page,
                                                          @RequestParam(defaultValue = "10") int limit,
                                                          @RequestAttribute("id") String id) {
@@ -49,7 +43,7 @@ public class NotesController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/notes")
+    @GetMapping("${currentApiPrefix}/notes")
     public ResponseEntity<Response> getAllVerifiedNotes(@RequestParam(defaultValue = "") String categoryCode,
                                                         @RequestParam(defaultValue = "0") int page,
                                                         @RequestParam(defaultValue = "10") int limit) {
@@ -58,21 +52,21 @@ public class NotesController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping(value = "/notes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Response> createNotes(@Valid @ModelAttribute NotesRequest request,
-                                                @RequestAttribute("id") String id) {
+    @PostMapping(value = "${currentApiPrefix}/notes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Response> createNotes(@Valid @ModelAttribute NotesRequest request) {
+        String id = "123456";
         request.setFkAccountOwner(id);
         Response notesResponse = notesService.createNotes(request);
         return new ResponseEntity<>(notesResponse, HttpStatus.CREATED);
     }
 
-    @GetMapping("/notes/{notesId}")
+    @GetMapping("${currentApiPrefix}/notes/{notesId}")
     public ResponseEntity<Response> getNotesById(@PathVariable("notesId") String notesId) {
         Response response = notesService.getNotesById(notesId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/notes/{notesId}")
+    @PutMapping("${currentApiPrefix}/notes/{notesId}")
     public ResponseEntity<Response> replaceNotesById(@PathVariable("notesId") String notesId,
                                                      @Valid @RequestBody NotesRequest request,
                                                      @RequestAttribute("id") String id) {
@@ -80,7 +74,7 @@ public class NotesController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @DeleteMapping("/notes/{notesId}")
+    @DeleteMapping("${currentApiPrefix}/notes/{notesId}")
     public ResponseEntity<Response> deleteNotesById(@PathVariable("notesId") String notesId,
                                                     @RequestAttribute("id") String id) {
         Response response = notesService.deleteNotes(id, notesId);

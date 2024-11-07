@@ -19,7 +19,6 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class StorageServiceImpl implements StorageService {
 
     @Value("${aws.s3.bucketName}")

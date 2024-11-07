@@ -20,7 +20,7 @@ include:
 
 notes-tests:
  stage: test
- image: maven:3-jdk-10
+ image: maven:3.6.3-jdk-8
  before_script:
    - cd ./apps/notes
  script:

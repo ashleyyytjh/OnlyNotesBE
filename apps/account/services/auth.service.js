@@ -4,13 +4,7 @@ dotenv.config()
 const auth_url = process.env.cognito_subdomain + "." + process.env.cognito_domain
 
 async function exchangeCode(code) {
-    // console.log(process.env["cognito_client-id"])
-    // console.log("Running exchange")
-    //
-    // console.log(process.env["cognito_client-id"])
-    // console.log(process.env.cognito_callback_url)
-    // console.log(auth_url)
-    // console.log(code)
+
     return await fetch(`https://${auth_url}/oauth2/token`, {
         method: 'POST',
         headers: {
@@ -23,7 +17,6 @@ async function exchangeCode(code) {
             code: code,
         })
     });
-
 
 }
 

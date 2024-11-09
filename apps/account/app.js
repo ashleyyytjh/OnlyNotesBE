@@ -16,7 +16,7 @@ var app = express();
 // const port = PORT || 5000;
 // Allow requests from your frontend URL
 app.use(cors({
-  origin: process.env.frontend_cors,
+  origin: process.env.frontend,
   credentials: true,
 }));
 

@@ -36,6 +36,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 // app.use('/users', usersRouter);
 app.use('/api/v1/auth', callbackRouter);
 app.use('/api/v1/users', usersRouter);
+app.get('/', (req, res) => {
+  res.status(200).send('OK');
+});
 
 
 // catch 404 and forward to error handler

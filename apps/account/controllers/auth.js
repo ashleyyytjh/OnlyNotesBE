@@ -5,7 +5,7 @@ const dotenv = require('dotenv')
 
 const app = express();
 
-
+const cookieDomain = "." + process.env['domain']
 
 app.use(cookieParser());
 dotenv.config()
@@ -24,14 +24,14 @@ async function auth(req, res){
             httpOnly: true,
             secure: true,
             sameSite: 'none',
-            domain: process.env['frontend']
+            domain: cookieDomain
         });
 
         res.cookie('access_token', tokens["access_token"], {
             httpOnly: true,
             secure: true,
             sameSite: 'none',
-            domain: process.env['frontend']
+            domain: cookieDomain
         });
 
 
@@ -39,14 +39,14 @@ async function auth(req, res){
             httpOnly: true,
             secure: true,
             sameSite: 'none',
-            domain: process.env['frontend']
+            domain: cookieDomain
         });
 
         res.cookie('auth', "true", {
             httpOnly: false,
             secure: true,
             sameSite: 'none',
-            domain: process.env['frontend']
+            domain: cookieDomain
         });
 
         const tokenIssuedAtInSeconds = Date.now();
@@ -58,7 +58,7 @@ async function auth(req, res){
             httpOnly: false,
             secure: true,
             sameSite: 'none',
-            domain: process.env['frontend']
+            domain: cookieDomain
         });
 
         return res.status(response.status).json()
@@ -88,14 +88,14 @@ async function refreshToken(req, res){
             httpOnly: true,
             secure: true,
             sameSite: 'none',
-            domain: process.env['frontend']
+            domain: cookieDomain
         });
 
         res.cookie('access_token', tokens["access_token"], {
             httpOnly: true,
             secure: true,
             sameSite: 'none',
-            domain: process.env['frontend']
+            domain: cookieDomain
         });
         console.log("HELLO:", tokens["access_token"])
 
@@ -108,7 +108,7 @@ async function refreshToken(req, res){
             httpOnly: false,
             secure: true,
             sameSite: 'none',
-            domain: process.env['frontend']
+            domain: cookieDomain
         });
 
         return res.status(200).json({tokens})

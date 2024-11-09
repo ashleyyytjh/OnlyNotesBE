@@ -58,6 +58,7 @@ async function auth(req, res){
 
         return res.status(response.status).json()
     }catch (e){
+        console.log("ERROR HERE: " + e.stack);
         return res.status(404).json()
     }
 }

@@ -29,20 +29,20 @@ public class MessageSender {
     // ORDERS
     public void publishNotesMissing(OrderCreated message) {
         logger.info(String.format("Publishing message: %s", message));
-        sendMessage(listingsExchange, "orders.notes.missing", message, message.get_id());
+        sendMessage(ordersExchange, "orders.notes.missing", message, message.get_id());
         // rabbitTemplate.convertAndSend(ordersExchange, "orders.notes.missing", message);
     }
 
     public void publishNotesFound(OrderCreated message) {
         logger.info(String.format("Publishing message: %s", message));
-        sendMessage(listingsExchange, "orders.notes.found", message, message.get_id());
+        sendMessage(ordersExchange, "orders.notes.found", message, message.get_id());
         // rabbitTemplate.convertAndSend(ordersExchange, "orders.notes.found", message);
     }
 
     // Take info from Orders service and append information about notes (everything except id)
     public void publishEmailClients(OrdersNotesSuccess message) {
         logger.info(String.format("Publishing message: %s", message));
-        sendMessage(listingsExchange, "orders.email", message, message.get_id());
+        sendMessage(ordersExchange, "orders.email", message, message.get_id());
         // rabbitTemplate.convertAndSend(ordersExchange, "orders.email", message);
     }
 
@@ -60,6 +60,7 @@ public class MessageSender {
     }
 
     public void sendMessage(String exchange, String routingKey, Object message, String correlationId) {
+        System.out.println("Sending message HERE");
         MessagePostProcessor processor = msg -> {
             msg.getMessageProperties().setCorrelationId(correlationId);
             return msg;

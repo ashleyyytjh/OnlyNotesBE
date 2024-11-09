@@ -17,7 +17,9 @@ async function auth(req, res){
         const {code} = req.query;
 
         const response = await exchangeCode(code);
+        console.log("exchange complete")
         const tokens = await response.json()
+        console.log("exchange showing token")
         console.log(tokens)
 
         res.cookie('id_token', tokens["id_token"], {

@@ -14,6 +14,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -40,7 +41,7 @@ public class SecurityConfig {
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"));
         // Specify the headers that are allowed for cross-origin requests, which accepts
         // all here
-        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowedHeaders(List.of("*"));
         // Allows the inclusion of credentials (e.g., cookies) in cross-origin requests
         configuration.setAllowCredentials(true);
         // Creates a source for CORS configuration
@@ -55,6 +56,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable()).cors().and() // Enable CORS
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/public/**").permitAll()
+                        .requestMatchers("/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter(),

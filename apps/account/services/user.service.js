@@ -21,7 +21,7 @@ async function retrieveUser(sub){
         // Extract email and sub from Attributes
         const email = userData.Attributes.find(attr => attr.Name === "email").Value;
         const userId = userData.Attributes.find(attr => attr.Name === "sub").Value;
-        console.log("T:", email)
+        // console.log("T:", email)
 // Create new object
         const newUserData = {
             username: userData.Username,
@@ -33,7 +33,7 @@ async function retrieveUser(sub){
 
         return newUserData;  // Return user info data (can be formatted)
     } catch (error) {
-        console.error('Error fetching user info:', error);
+        // console.error('Error fetching user info:', error);
         throw error;
     }
     //

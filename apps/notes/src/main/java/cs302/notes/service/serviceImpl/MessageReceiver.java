@@ -1,14 +1,17 @@
-package cs302.notes.consumer;
+package cs302.notes.service.serviceImpl;
 
 import cs302.notes.models.*;
 import cs302.notes.exceptions.NotesNotFoundException;
-import cs302.notes.producer.MessageSender;
 import cs302.notes.repository.NotesRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MessageReceiver {
+
+    private final Logger logger = LoggerFactory.getLogger(MessageSender.class);
 
     private final NotesRepository repository;
     private final MessageSender messageSender;
@@ -20,6 +23,7 @@ public class MessageReceiver {
 
     @RabbitListener(queues = "${rabbitmq.orders.created.queue}")
     public void receiveMessage(final OrderCreated request) {
+        logger.info(String.format("Receiving message: %s", request));
         try {
             repository.findBy_id(request.getNoteId()).orElseThrow(() -> new NotesNotFoundException(request.getNoteId()));
             messageSender.publishNotesFound(request);
@@ -32,6 +36,7 @@ public class MessageReceiver {
 
     @RabbitListener(queues = "${rabbitmq.orders.success.queue}")
     public void receiveMessage(final OrderSuccess request) {
+        logger.info(String.format("Receiving message: %s", request));
         try {
             System.out.println("Forwarded signed url for notification");
             // Append stuff for notes and forward to eddy
@@ -49,6 +54,7 @@ public class MessageReceiver {
 
     @RabbitListener(queues = "${rabbitmq.listings.verified.queue}")
     public void receiveMessage(final ListingStatus request) {
+        logger.info(String.format("Receiving message: %s", request));
         try {
             System.out.println("Notes verified");
             Notes notes = repository.findBy_id(request.get_id())

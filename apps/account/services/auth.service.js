@@ -56,7 +56,7 @@ async function refreshTokens(refreshToken) {
             refresh_token: refreshToken,
         }),
     });
-    console.log(result.status)
+    // console.log(result.status)
     return result;
 
 }

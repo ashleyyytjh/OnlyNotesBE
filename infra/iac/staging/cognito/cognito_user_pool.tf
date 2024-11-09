@@ -30,7 +30,7 @@ resource "aws_cognito_user_pool" "onlynotes_user-pool" {
   }
 
   mfa_configuration = "OPTIONAL"
-  name              = "onlynotes"
+  name              = "onlynotes-${var.environment}"
 
   password_policy {
     minimum_length                   = "8"
@@ -74,7 +74,7 @@ resource "aws_cognito_user_pool" "onlynotes_user-pool" {
   }
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
 }

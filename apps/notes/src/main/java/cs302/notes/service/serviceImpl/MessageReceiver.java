@@ -3,8 +3,11 @@ package cs302.notes.service.serviceImpl;
 import cs302.notes.models.*;
 import cs302.notes.exceptions.NotesNotFoundException;
 import cs302.notes.repository.NotesRepository;
+import io.opentelemetry.api.trace.Span;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +25,8 @@ public class MessageReceiver {
     }
 
     @RabbitListener(queues = "${rabbitmq.orders.created.queue}")
-    public void receiveMessage(final OrderCreated request) {
+    public void receiveMessage(final OrderCreated request, Message message) {
+        correlateSpan(message);
         logger.info(String.format("Receiving message: %s", request));
         try {
             repository.findBy_id(request.getNoteId()).orElseThrow(() -> new NotesNotFoundException(request.getNoteId()));
@@ -36,7 +40,8 @@ public class MessageReceiver {
     }
 
     @RabbitListener(queues = "${rabbitmq.orders.success.queue}")
-    public void receiveMessage(final OrderSuccess request) {
+    public void receiveMessage(final OrderSuccess request, Message message) {
+        correlateSpan(message);
         logger.info(String.format("Receiving message: %s", request));
         try {
             System.out.println("Forwarded signed url for notification");
@@ -54,7 +59,8 @@ public class MessageReceiver {
     }
 
     @RabbitListener(queues = "${rabbitmq.listings.verified.queue}")
-    public void receiveMessage(final ListingStatus request) {
+    public void receiveMessage(final ListingStatus request, Message message) {
+        correlateSpan(message);
         logger.info(String.format("Receiving message: %s", request));
         try {
             System.out.println("Notes verified");
@@ -67,6 +73,14 @@ public class MessageReceiver {
             System.out.println("Notes no longer found");
         } catch (Exception e) {
             System.out.println("Error receiving verification");
+        }
+    }
+
+    public void correlateSpan(Message message) {
+        String correlationId = (String) message.getMessageProperties().getHeaders().get("correlation_id");
+        Span currentSpan = Span.current();
+        if (currentSpan != null && currentSpan.isRecording()) {
+            currentSpan.setAttribute("correlation_id", correlationId);
         }
     }
 }

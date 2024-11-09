@@ -1,11 +1,11 @@
 terraform {
   backend "s3" {
     bucket = "onlynotes-tf-state-management"
-    key    = "state/terraform.tfstate"
+    key    = "state/development/terraform.tfstate"
     region = "ap-southeast-1"
     encrypt = true
 
-    dynamodb_table = "onlynotes_tf-state-lock-management"
+    dynamodb_table = "onlynotes_tf-state-lock-development"
   }
 
   required_providers {

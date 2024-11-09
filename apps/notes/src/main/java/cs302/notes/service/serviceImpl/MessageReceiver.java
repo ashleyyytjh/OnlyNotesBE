@@ -27,6 +27,7 @@ public class MessageReceiver {
         try {
             repository.findBy_id(request.getNoteId()).orElseThrow(() -> new NotesNotFoundException(request.getNoteId()));
             messageSender.publishNotesFound(request);
+            System.out.println(request);
         } catch (NotesNotFoundException e) {
             messageSender.publishNotesMissing(request);
         } catch (Exception e) {

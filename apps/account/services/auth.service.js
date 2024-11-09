@@ -13,7 +13,6 @@ async function exchangeCode(code) {
         body: new URLSearchParams({
             grant_type: 'authorization_code',
             client_id: process.env["cognito_client-id"],
-            client_secret: process.env["cognito_client-secret"],
             redirect_uri: process.env.cognito_callback_url,
             code: code,
 
@@ -52,7 +51,6 @@ async function refreshTokens(refreshToken) {
         body: new URLSearchParams({
             grant_type: 'refresh_token',
             client_id: process.env["cognito_client-id"],
-            client_secret: process.env["cognito_client-secret"],
             refresh_token: refreshToken,
         }),
     });

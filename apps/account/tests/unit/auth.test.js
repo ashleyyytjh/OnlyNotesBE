@@ -9,7 +9,6 @@ describe('Auth functions', () => {
       cognito_subdomain: 'authd',
       cognito_domain: 'onlynotes.net',
       'cognito_client-id': 'testClientId',
-      'cognito_client-secret': 'testClientSecret',
       cognito_callback_url: 'https://callback.example.com',
     };
     console.error = jest.fn();
@@ -32,7 +31,6 @@ describe('Auth functions', () => {
         const expectedBody = new URLSearchParams({
             grant_type: 'authorization_code',
             client_id: process.env['cognito_client-id'],
-            client_secret: process.env['cognito_client-secret'],
             redirect_uri: process.env.cognito_callback_url,
             code: mockCode,
         }).toString(); 
@@ -57,7 +55,6 @@ describe('Auth functions', () => {
       const expectedBody = new URLSearchParams({
         grant_type: 'refresh_token',
         client_id: process.env['cognito_client-id'],
-        client_secret: process.env['cognito_client-secret'],
         refresh_token: mockRefreshToken,
       }).toString();
 

@@ -5,6 +5,7 @@ import cs302.notes.models.OrderCreated;
 import cs302.notes.models.OrdersNotesSuccess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.MessagePostProcessor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -28,28 +29,42 @@ public class MessageSender {
     // ORDERS
     public void publishNotesMissing(OrderCreated message) {
         logger.info(String.format("Publishing message: %s", message));
-        rabbitTemplate.convertAndSend(ordersExchange, "orders.notes.missing", message);
+        sendMessage(listingsExchange, "orders.notes.missing", message, message.get_id());
+        // rabbitTemplate.convertAndSend(ordersExchange, "orders.notes.missing", message);
     }
 
     public void publishNotesFound(OrderCreated message) {
         logger.info(String.format("Publishing message: %s", message));
-        rabbitTemplate.convertAndSend(ordersExchange, "orders.notes.found", message);
+        sendMessage(listingsExchange, "orders.notes.found", message, message.get_id());
+        // rabbitTemplate.convertAndSend(ordersExchange, "orders.notes.found", message);
     }
 
     // Take info from Orders service and append information about notes (everything except id)
     public void publishEmailClients(OrdersNotesSuccess message) {
         logger.info(String.format("Publishing message: %s", message));
-        rabbitTemplate.convertAndSend(ordersExchange, "orders.email", message);
+        sendMessage(listingsExchange, "orders.email", message, message.get_id());
+        // rabbitTemplate.convertAndSend(ordersExchange, "orders.email", message);
     }
 
     // LISTINGS
     public void publishListingUploaded(ListingStatus message) {
         logger.info(String.format("Publishing message: %s", message));
-        rabbitTemplate.convertAndSend(listingsExchange, "listings.uploaded", message);
+        sendMessage(listingsExchange, "listings.uploaded", message, message.get_id());
+        // rabbitTemplate.convertAndSend(listingsExchange, "listings.uploaded", message);
     }
 
     public void publishListingCompleted(ListingStatus message) {
         logger.info(String.format("Publishing message: %s", message));
-        rabbitTemplate.convertAndSend(listingsExchange, "listings.completed", message);
+        sendMessage(listingsExchange, "listings.completed", message, message.get_id());
+        // rabbitTemplate.convertAndSend(listingsExchange, "listings.completed", message);
+    }
+
+    public void sendMessage(String exchange, String routingKey, Object message, String correlationId) {
+        MessagePostProcessor processor = msg -> {
+            msg.getMessageProperties().setCorrelationId(correlationId);
+            return msg;
+        };
+
+        rabbitTemplate.convertAndSend(exchange, routingKey, message, processor);
     }
 }

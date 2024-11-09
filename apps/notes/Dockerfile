@@ -12,8 +12,11 @@ RUN addgroup -S spring && adduser -S spring -G spring
 RUN mkdir /logs && chown -R spring:spring /logs
 USER spring:spring
 
+# Copy OpenTelemetry Java Agent
+COPY opentelemetry-javaagent.jar /opentelemetry-javaagent.jar
+
 # ARG JAR_FILE=target/*.jar
 COPY --from=build /target/notes-0.0.1-SNAPSHOT.jar .
 
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "notes-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-javaagent:/opentelemetry-javaagent.jar", "-jar", "notes-0.0.1-SNAPSHOT.jar"]

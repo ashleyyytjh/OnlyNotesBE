@@ -99,10 +99,9 @@ public class StorageServiceImpl implements StorageService {
 
         // Obtain url from s3
         GetUrlRequest request = GetUrlRequest.builder().bucket(bucketName ).key(key).build();
-        String url = s3Client.utilities().getUrl(request).toExternalForm();
 
         // Return secure filename
-        return url;
+        return s3Client.utilities().getUrl(request).toExternalForm();
     }
 
     private String getSecureFileName(String originalFilename) {
@@ -125,7 +124,7 @@ public class StorageServiceImpl implements StorageService {
 
     private File convertMultiPartFileToFile(MultipartFile file, String secureFileName) throws FileNotConvertedException {
 
-        File convertedFile = new File(secureFileName);
+        File convertedFile = new File("uploads/" + secureFileName);
         try (FileOutputStream fos = new FileOutputStream(convertedFile)) {
             fos.write(file.getBytes());
         } catch (IOException e) {

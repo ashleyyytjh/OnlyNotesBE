@@ -9,7 +9,7 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:17-jdk-alpine
 # Use non-root system user for security
 RUN addgroup -S spring && adduser -S spring -G spring
-RUN mkdir /logs && chown -R spring:spring /logs
+RUN mkdir /uploads && chown -R spring:spring /uploads
 USER spring:spring
 
 # Copy OpenTelemetry Java Agent

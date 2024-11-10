@@ -38,7 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
-    @Value("${cognito.userpool.id}")
+    @Value("${cognito.userpool.id:defaultUserPoolId}")
     private String userPoolId;
 
     JwkProvider provider = new JwkProviderBuilder("https://cognito-idp.ap-southeast-1.amazonaws.com/" + userPoolId)
@@ -47,6 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @PostConstruct
     public void init() {
+        System.out.println("userPoolId: " + userPoolId);
         provider = createJwkProvider();
     }
 

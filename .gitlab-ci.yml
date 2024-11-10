@@ -1,6 +1,6 @@
 stages:
   - trigger
-  - notify
+  - notification 
 
 trigger_orders:
   stage: trigger
@@ -53,10 +53,18 @@ trigger_verify:
     - changes:
         - apps/verify/**/*
 
-notify_discord:
-  stage: notify
+success_notification:
+  stage: notification  
   script:
-    - |
-      payload="{\"content\": \"Pipeline Status: $CI_PIPELINE_STATUS\nProject: $CI_PROJECT_NAME\nCommit: $CI_COMMIT_REF_NAME\nCommit message: $CI_COMMIT_MESSAGE\nPipeline URL: $CI_PIPELINE_URL\"}"
-      echo $payload  # Add this line to print the payload and inspect it
-      curl -X POST -H "Content-Type: application/json" -d "$payload" $DISCORD_WEBHOOK_URL
+    - wget https://raw.githubusercontent.com/DiscordHooks/gitlab-ci-discord-webhook/master/send.sh
+    - chmod +x send.sh
+    - ./send.sh success $WEBHOOK_URL
+  when: on_success
+
+failure_notification:
+  stage: notification  
+  script:
+    - wget https://raw.githubusercontent.com/DiscordHooks/gitlab-ci-discord-webhook/master/send.sh
+    - chmod +x send.sh
+    - ./send.sh failure $WEBHOOK_URL
+  when: on_failure

@@ -26,8 +26,8 @@ import static org.springframework.security.web.util.matcher.AntPathRequestMatche
 public class SecurityConfig {
 
     private final List<String> allowedOrigins = new ArrayList<>() {
-        { add("staging.onlynotes.net");}
-        { add("www.onlynotes.net"); }
+        { add("https://staging.onlynotes.net");}
+        { add("https://www.onlynotes.net"); }
         { add("http://localhost:5173"); }
         { add("https://apis.onlynotes.net"); }
     };

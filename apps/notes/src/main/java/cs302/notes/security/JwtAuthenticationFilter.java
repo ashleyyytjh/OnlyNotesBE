@@ -107,10 +107,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return null;
         }
     }
-
-
-
-
+    
     public RSAPublicKey getPublicKey(String kid) throws Exception {
         Jwk jwk = provider.get(kid);
         return (RSAPublicKey) jwk.getPublicKey();

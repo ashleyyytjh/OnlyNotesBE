@@ -51,7 +51,7 @@ public class IntegrationTests {
     void healthCheck() throws Exception {
         mockMvc.perform(get("/health"))
                         .andExpect(status().isOk())
-                        .andExpect(jsonPath("$.message").value("Hello World!"));
+                        .andExpect(jsonPath("$.message").value("Notes Service is running"));
     }
 
     @Test

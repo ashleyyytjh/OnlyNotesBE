@@ -129,7 +129,7 @@ public class StorageServiceImpl implements StorageService {
         try (FileOutputStream fos = new FileOutputStream(convertedFile)) {
             fos.write(file.getBytes());
         } catch (IOException e) {
-            logger.warn(String.format("FileNotConvertedException: %s", secureFileName));
+            logger.warn(String.format("FileNotConvertedException: %s", e.getMessage()));
             throw new FileNotConvertedException(file.getOriginalFilename());
         }
         return convertedFile;

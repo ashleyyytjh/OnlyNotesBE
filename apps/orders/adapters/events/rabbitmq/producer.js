@@ -18,11 +18,11 @@ async function configProducer() {
   }
 }
 
-function publish(id, event, data) {
+async function publish(id, event, data) {
   try {
     const rk = `orders.${event}`;
     ch.publish("orders", rk, Buffer.from(JSON.stringify(data)), {
-      correlationId: id
+      correlationId: `${id}`
     });
     console.log("Published %s event for transaction id: %s", event, id);
     return true;
@@ -32,14 +32,15 @@ function publish(id, event, data) {
   return false;
 }
 
-function publishOrderCreated(id, data) {
+async function publishOrderCreated(id, data) {
+  console.log('data is ', data);
   console.log("published orderCreated event", data);
-  return publish(id, "created", data);
+  return await publish(id, "created", data);
 }
 
-function publishOrderSuccessful(id, data) {
+async function publishOrderSuccessful(id, data) {
   console.log('published orderSuccessful event', data)
-  return publish(id, "success", data);
+  return await publish(id, "success", data);
 }
 
 module.exports = {

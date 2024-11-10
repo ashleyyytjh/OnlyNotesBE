@@ -5,7 +5,7 @@ const dotenv = require('dotenv')
 
 const app = express();
 
-
+const cookieDomain = "." + process.env['domain']
 
 app.use(cookieParser());
 dotenv.config()
@@ -23,26 +23,30 @@ async function auth(req, res){
         res.cookie('id_token', tokens["id_token"], {
             httpOnly: true,
             secure: true,
-            sameSite: 'Strict'
+            sameSite: 'none',
+            domain: cookieDomain
         });
 
         res.cookie('access_token', tokens["access_token"], {
             httpOnly: true,
             secure: true,
-            sameSite: 'Strict'
+            sameSite: 'none',
+            domain: cookieDomain
         });
 
 
         res.cookie('refresh_token', tokens["refresh_token"], {
             httpOnly: true,
             secure: true,
-            sameSite: 'Strict'
+            sameSite: 'none',
+            domain: cookieDomain
         });
 
         res.cookie('auth', "true", {
             httpOnly: false,
             secure: true,
-            sameSite: 'Strict'
+            sameSite: 'none',
+            domain: cookieDomain
         });
 
         const tokenIssuedAtInSeconds = Date.now();
@@ -53,11 +57,13 @@ async function auth(req, res){
         res.cookie('access_token_expire', tokenMaxAge, {
             httpOnly: false,
             secure: true,
-            sameSite: 'Strict'
+            sameSite: 'none',
+            domain: cookieDomain
         });
 
         return res.status(response.status).json()
     }catch (e){
+        console.log("ERROR HERE: " + e.stack);
         return res.status(404).json()
     }
 }
@@ -81,13 +87,15 @@ async function refreshToken(req, res){
         res.cookie('id_token', tokens["id_token"], {
             httpOnly: true,
             secure: true,
-            sameSite: 'Strict'
+            sameSite: 'none',
+            domain: cookieDomain
         });
 
         res.cookie('access_token', tokens["access_token"], {
             httpOnly: true,
             secure: true,
-            sameSite: 'Strict'
+            sameSite: 'none',
+            domain: cookieDomain
         });
         console.log("HELLO:", tokens["access_token"])
 
@@ -99,7 +107,8 @@ async function refreshToken(req, res){
         res.cookie('access_token_expire', tokenMaxAge, {
             httpOnly: false,
             secure: true,
-            sameSite: 'Strict'
+            sameSite: 'none',
+            domain: cookieDomain
         });
 
         return res.status(200).json({tokens})

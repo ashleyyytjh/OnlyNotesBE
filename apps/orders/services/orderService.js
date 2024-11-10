@@ -85,6 +85,7 @@ class OrderService {
             };
 
         } catch (error) {
+            console.log(error)
             throw new Error('Internal server error'); // Ensure this matches your test expectation
         }
     }

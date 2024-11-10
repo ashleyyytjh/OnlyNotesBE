@@ -1,8 +1,10 @@
 package cs302.notes.security;
 
+import lombok.Getter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import io.jsonwebtoken.Claims;
 
+@Getter
 public class JwtAuthenticationToken extends AbstractAuthenticationToken {
 
     private final Claims claims;
@@ -23,7 +25,4 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
         return claims.getSubject();
     }
 
-    public Claims getClaims() {
-        return claims;
-    }
 }

@@ -16,7 +16,7 @@ var app = express();
 // const port = PORT || 5000;
 // Allow requests from your frontend URL
 app.use(cors({
-  origin: process.env.frontend_cors,
+  origin: process.env.frontend,
   credentials: true,
 }));
 
@@ -36,6 +36,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 // app.use('/users', usersRouter);
 app.use('/api/v1/auth', callbackRouter);
 app.use('/api/v1/users', usersRouter);
+app.get('/', (req, res) => {
+  res.status(200).send('OK');
+});
 
 
 // catch 404 and forward to error handler

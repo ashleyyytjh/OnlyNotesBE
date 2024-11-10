@@ -32,12 +32,13 @@ function publish(id, event, data) {
   return false;
 }
 
-function publishOrderCreated(id, data) {
+async function publishOrderCreated(id, data) {
+  console.log('data is ', data);
   console.log("published orderCreated event", data);
   return publish(id, "created", data);
 }
 
-function publishOrderSuccessful(id, data) {
+async function publishOrderSuccessful(id, data) {
   console.log('published orderSuccessful event', data)
   return publish(id, "success", data);
 }

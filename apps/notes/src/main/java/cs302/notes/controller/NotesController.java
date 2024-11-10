@@ -64,17 +64,6 @@ public class NotesController {
     @PostMapping(value = "${currentApiPrefix}/notes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Response> createNotes(@Valid @ModelAttribute CreateNotesRequest request,
                                                 @RequestAttribute("id") String id) {
-        if (request.getFile() != null && request.getFile() instanceof MultipartFile) {
-            MultipartFile file = (MultipartFile) request.getFile();
-            logger.info("File name: {}", file.getOriginalFilename());
-            logger.info("File size: {}", file.getSize());
-            logger.info("Content type: {}", file.getContentType());
-        } else {
-            logger.warn("No multipart file found in the request.");
-        }
-
-        logger.info("Request body: {}", request);
-
         Response notesResponse = notesService.createNotes(request, id);
         logger.info("POST /notes 201");
         return new ResponseEntity<>(notesResponse, HttpStatus.CREATED);

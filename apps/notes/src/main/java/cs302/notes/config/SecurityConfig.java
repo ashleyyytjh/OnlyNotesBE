@@ -3,6 +3,7 @@ package cs302.notes.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -17,14 +18,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final List<String> allowedOrigins = new ArrayList<>() {
-        { add("staging.onlynotes.net");}
-        { add("www.onlynotes.net"); }
+        { add("https://staging.onlynotes.net");}
+        { add("https://www.onlynotes.net"); }
         { add("http://localhost:5173"); }
         { add("https://apis.onlynotes.net"); }
     };
@@ -63,11 +66,12 @@ public class SecurityConfig {
     protected SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable()).cors().and() // Enable CORS
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/public/**").permitAll()
-                        .requestMatchers("/**").permitAll()
+                        .requestMatchers(antMatcher(HttpMethod.GET, "/health")).permitAll()
+                        .requestMatchers(antMatcher(HttpMethod.GET, "/api/v1/notes")).permitAll()
+                        .requestMatchers(antMatcher(HttpMethod.GET, "/api/v1/notes/**")).permitAll()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthenticationFilter(),
+                .addFilterAfter(jwtAuthenticationFilter(),
                         UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

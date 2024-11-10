@@ -28,9 +28,9 @@ public class NotesController {
         this.notesService = notesService;
     }
 
-    @GetMapping("${currentApiPrefix}/health")
+    @GetMapping("/health")
     public ResponseEntity<Response> healthCheck() {
-        Response response = DefaultResponse.builder().message("Hello World!").build();
+        Response response = DefaultResponse.builder().message("Notes Service is running").build();
         logger.info("GET /health 200");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

@@ -13,6 +13,20 @@ variables:
   SERVICE_NAME: request-ecs-staging-2
   TASK_DEFINITION_NAME: request-ecs-task-staging
 
+# Jest tests
+request-unit-tests:
+  stage: test
+  image: node:20-slim
+  before_script:
+    - cd ./apps/request
+    - npm install
+  script:
+    - npm run test:unit
+  allow_failure: true
+  artifacts:
+    when: always
+    paths:
+      - coverage/
 
 include:
   - template: Jobs/Dependency-Scanning.gitlab-ci.yml

@@ -1,29 +1,22 @@
 package cs302.notes.security;
 
-import cs302.notes.exceptions.UnauthorizedException;
 import com.auth0.jwk.Jwk;
 import com.auth0.jwk.JwkProvider;
 import com.auth0.jwk.JwkProviderBuilder;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -38,7 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
-    @Value("${cognito.userpool.id}")
+    @Value("${cognito.userpool.id:defaultUserPoolId}")
     private String userPoolId;
 
     JwkProvider provider = new JwkProviderBuilder("https://cognito-idp.ap-southeast-1.amazonaws.com/" + userPoolId)
@@ -47,6 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @PostConstruct
     public void init() {
+        System.out.println("userPoolId: " + userPoolId);
         provider = createJwkProvider();
     }
 
@@ -80,7 +74,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 httpRequest.setAttribute("username", getValueFromTokenPayload(id_token, "cognito:username"));
                 httpRequest.setAttribute("email", getValueFromTokenPayload(id_token, "email"));
             }
-
         }
 
         filterChain.doFilter(request, response);

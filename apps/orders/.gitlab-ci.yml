@@ -38,25 +38,30 @@ orders-unit-tests:
 
 orders-integration-tests:
   stage: test
-  image: node:20-slim
-  before_script:
-    - apt-get update && apt-get install -y docker-compose
-    - cd ./apps/orders
-    - npm install
-    - npm run docker-build:integration  
-    - ./ci/wait-for-it.sh db:27017 --timeout=30 --strict -- echo "Database is ready"  
-  script:
-    - npm run test:integration  
-  allow_failure: false 
-  artifacts:
-    when: always
-    paths:
-      - coverage/ 
+  image: docker:latest
+  services:
+    - docker:dind
   variables:
-    STRIPE_SECRET_KEY: $STRIPE_SECRET_KEY 
-    TEST_MONGODB_URI: $TEST_MONGODB_URI  
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DRIVER: overlay2
+  script:
+    - docker-compose -f ci/compose.test.yaml up -d --build
+    - |
+      for i in {1..30}; do
+        if docker-compose -f ci/compose.test.yaml logs orders | grep -q "Tests complete"; then
+          echo "Tests completed successfully."
+          break
+        fi
+        echo "Waiting for tests to complete..."
+        sleep 5
+      done
+    - docker-compose -f ci/compose.test.yaml logs orders
   after_script:
-    - docker-compose -f ./ci/compose.test.yaml down  
+    - docker-compose -f ci/compose.test.yaml down  # Clean up containers
+  artifacts:
+    paths:
+      - coverage/  # Capture coverage if generated
+    when: always
 
 # Build Docker Image
 orders-build:

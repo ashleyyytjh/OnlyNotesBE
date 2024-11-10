@@ -30,9 +30,12 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 //body parse is for stripe webhook
-app.use('/api/v1/health', healthRouter);
 app.use('/api/v1/requests', requestItemRoute);
 app.use('/api/v1/notify', notifyRoute);
+app.get('/', (req, res) => {
+    res.status(200).send('OK');
+});
+
 
 
 // // catch 404 and forward to error handler

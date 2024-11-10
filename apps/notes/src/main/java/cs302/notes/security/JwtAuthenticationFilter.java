@@ -1,7 +1,9 @@
 package cs302.notes.security;
 
+import cs302.notes.exceptions.UnauthorizedException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -24,9 +26,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
-        String token = WebUtils.getCookie(request, "access_token").getValue();
-        String id_token = WebUtils.getCookie(request, "id_token").getValue();
+        HttpServletRequest httpRequest = request;
+
+        Cookie accessTokenCookie = WebUtils.getCookie(httpRequest, "access_token");
+        Cookie idTokenCookie = WebUtils.getCookie(httpRequest, "id_token");
+        if (accessTokenCookie == null || idTokenCookie == null) { throw new UnauthorizedException(); }
+
+        String token = accessTokenCookie.getValue();
+        String id_token = idTokenCookie.getValue();
+
         if (token != null && validateToken(token) && validateToken(id_token)) {
             Claims claims = getClaimsFromToken(token);
             if (claims != null) {
@@ -45,7 +53,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private boolean validateToken(String token) {
         try {
-//            logger.info(JwkUtil.getKidFromTokenHeader(token));
             String kid = JwkUtil.getKidFromTokenHeader(token);
             RSAPublicKey publicKey = JwkUtil.getPublicKey(kid);
             Jwts.parser()

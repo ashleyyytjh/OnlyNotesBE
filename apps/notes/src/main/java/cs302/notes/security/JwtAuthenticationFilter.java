@@ -80,7 +80,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 httpRequest.setAttribute("username", getValueFromTokenPayload(id_token, "cognito:username"));
                 httpRequest.setAttribute("email", getValueFromTokenPayload(id_token, "email"));
             }
-
         }
 
         filterChain.doFilter(request, response);

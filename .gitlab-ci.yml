@@ -56,5 +56,7 @@ trigger_verify:
 notify_discord:
   stage: notify
   script:
-    - >
-      curl -X POST -H "Content-Type: application/json" -d "{\"content\": \"Pipeline Status: $CI_PIPELINE_STATUS\nProject: $CI_PROJECT_NAME\nCommit: $CI_COMMIT_REF_NAME\nCommit message: $CI_COMMIT_MESSAGE\nPipeline URL: $CI_PIPELINE_URL\"}" $DISCORD_WEBHOOK_URL
+    - |
+      payload="{\"content\": \"Pipeline Status: $CI_PIPELINE_STATUS\nProject: $CI_PROJECT_NAME\nCommit: $CI_COMMIT_REF_NAME\nCommit message: $CI_COMMIT_MESSAGE\nPipeline URL: $CI_PIPELINE_URL\"}"
+      echo $payload  # Add this line to print the payload and inspect it
+      curl -X POST -H "Content-Type: application/json" -d "$payload" $DISCORD_WEBHOOK_URL

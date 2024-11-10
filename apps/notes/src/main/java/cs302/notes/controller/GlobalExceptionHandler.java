@@ -2,10 +2,7 @@ package cs302.notes.controller;
 
 import cs302.notes.data.response.ErrorResponse;
 import cs302.notes.data.response.Response;
-import cs302.notes.exceptions.BadRequestException;
-import cs302.notes.exceptions.ForbiddenException;
-import cs302.notes.exceptions.InternalServerError;
-import cs302.notes.exceptions.NotFoundException;
+import cs302.notes.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -55,6 +52,19 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Response> handleServletRequestBindingException(ServletRequestBindingException ex) {
         Map<String, String> errors = new HashMap<>();
         errors.put("message", "No user credentials were provided.");
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ErrorResponse.builder()
+                        .statusCode(401)
+                        .errors(errors)
+                        .build());
+    }
+
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<Response> handleUnauthorizedException(UnauthorizedException ex) {
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(ErrorResponse.builder()

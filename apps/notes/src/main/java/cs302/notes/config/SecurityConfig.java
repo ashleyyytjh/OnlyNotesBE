@@ -13,6 +13,7 @@ import cs302.notes.security.JwtAuthenticationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,6 +21,13 @@ import java.util.List;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final List<String> allowedOrigins = new ArrayList<>() {
+        { add("staging.onlynotes.net");}
+        { add("www.onlynotes.net"); }
+        { add("http://localhost:5173"); }
+        { add("https://apis.onlynotes.net"); }
+    };
 
     /*
      * Setting up of Cross-Origin Resource Sharing
@@ -35,7 +43,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         // Specifies the allowed origins (i.e., domains) that are permitted to make
         // cross-origin requests to your server
-        configuration.setAllowedOrigins(Arrays.asList("https://staging.onlynotes.net", "https://onlynotes.net", "http://localhost:5173"));
+        configuration.setAllowedOrigins(allowedOrigins);
         // Specify the HTTP methods that are allowed for cross-origin requests, which
         // accepts all methods here
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"));

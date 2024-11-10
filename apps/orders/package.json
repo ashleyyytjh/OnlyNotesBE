@@ -16,6 +16,7 @@
   "dependencies": {
     "@aws-sdk/client-eventbridge": "^3.651.1",
     "@aws-sdk/client-sqs": "^3.651.1",
+    "@opentelemetry/exporter-logs-otlp-grpc": "^0.54.2",
     "@opentelemetry/exporter-metrics-otlp-grpc": "^0.54.2",
     "@opentelemetry/exporter-trace-otlp-grpc": "^0.53.0",
     "@opentelemetry/instrumentation-amqplib": "^0.42.0",

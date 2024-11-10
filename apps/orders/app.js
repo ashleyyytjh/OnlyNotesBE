@@ -25,9 +25,8 @@ app.use(logger('dev'));
 
 // Allow requests from your frontend URL
 app.use(cors({
-    origin: 'http://localhost:5173',
-    credentials: true,
-
+    origin: ['http://localhost:5173', 'https://staging.onlynotes.net', 'https://onlynotes.net'],
+    credentials: true
 }));
 //body parse is for stripe webhook
 app.use(

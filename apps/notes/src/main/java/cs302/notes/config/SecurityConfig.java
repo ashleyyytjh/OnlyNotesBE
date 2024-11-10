@@ -35,7 +35,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         // Specifies the allowed origins (i.e., domains) that are permitted to make
         // cross-origin requests to your server
-        configuration.setAllowedOrigins(Arrays.asList("staging.onlynotes.net", "www.onlynotes.net", "http://localhost:5173"));
+        configuration.setAllowedOrigins(Arrays.asList("https://staging.onlynotes.net", "https://onlynotes.net", "http://localhost:5173"));
         // Specify the HTTP methods that are allowed for cross-origin requests, which
         // accepts all methods here
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"));

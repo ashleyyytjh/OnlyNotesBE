@@ -38,11 +38,9 @@ pika_logger.setLevel(logging.INFO)
 
 # Obtain environment variables
 load_dotenv()
-OPENAI_KEY = os.getenv("OPENAI_KEY") 
+OPENAI_KEY = os.getenv("OPENAI_KEY")
 VERIFIER_ASSISTANT_ID = os.getenv("VERIFIER_ASSISTANT_ID")
 VECTOR_STORE_ID = os.getenv("VECTOR_STORE_ID")
-AWS_ACCESS_KEY_ID=os.getenv("AWS_ACCESS_KEY_ID")
-AWS_SECRET_KEY=os.getenv("AWS_SECRET_KEY")
 
 # Specify global variables
 API_HEADER = '/api'
@@ -243,7 +241,7 @@ exchange = os.getenv("RABBITMQ_EXCHANGE")
 amqp_queue = os.getenv("RABBITMQ_QUEUE")
 
 queue = queue.Queue()
-s3 = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_KEY)
+s3 = boto3.client('s3')
 
 @dataclass
 class ListingStatus():

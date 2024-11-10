@@ -22,7 +22,7 @@ async function publish(id, event, data) {
   try {
     const rk = `orders.${event}`;
     ch.publish("orders", rk, Buffer.from(JSON.stringify(data)), {
-      correlationId: id
+      correlationId: `${id}`
     });
     console.log("Published %s event for transaction id: %s", event, id);
     return true;

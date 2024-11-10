@@ -27,11 +27,11 @@
     "express": "^4.21.1",
     "http-errors": "~1.6.3",
     "mongodb": "^6.8.0",
+    "mongoose": "^8.8.0",
     "morgan": "~1.9.1",
     "orders": "file:",
     "stripe": "^16.10.0",
-    "mongoose": "^8.8.0",
-    "token-verifier-mee-rebus": "^1.0.0"
+    "token-verifier-mee-rebus": "^1.0.3"
   },
   "devDependencies": {
     "aws-sdk-mock": "^6.2.0",

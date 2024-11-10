@@ -3,12 +3,21 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
+    "start": "node -r ./tracing ./bin/www",
     "dev": "nodemon ./bin/www",
     "test:unit": "jest --testPathPattern=unit"
   },
   "dependencies": {
     "@aws-sdk/client-sns": "^3.670.0",
+    "@opentelemetry/exporter-metrics-otlp-grpc": "^0.54.2",
+    "@opentelemetry/exporter-trace-otlp-grpc": "^0.54.2",
+    "@opentelemetry/instrumentation-amqplib": "^0.43.0",
+    "@opentelemetry/instrumentation-express": "^0.44.0",
+    "@opentelemetry/instrumentation-http": "^0.54.2",
+    "@opentelemetry/instrumentation-runtime-node": "^0.9.0",
+    "@opentelemetry/resources": "^1.27.0",
+    "@opentelemetry/sdk-metrics": "^1.27.0",
+    "@opentelemetry/sdk-node": "^0.54.2",
     "account": "file:",
     "amqplib": "^0.10.4",
     "aws-jwt-verify": "^4.0.1",

@@ -68,7 +68,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(antMatcher(HttpMethod.GET, "/health")).permitAll()
                         .requestMatchers(antMatcher(HttpMethod.GET, "/api/v1/notes")).permitAll()
-                        .requestMatchers(antMatcher(HttpMethod.GET, "/api/v1/notes/**")).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterAfter(jwtAuthenticationFilter(),

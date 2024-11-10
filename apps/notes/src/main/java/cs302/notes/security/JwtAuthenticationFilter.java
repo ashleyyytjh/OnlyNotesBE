@@ -1,32 +1,68 @@
 package cs302.notes.security;
 
+import com.auth0.jwk.Jwk;
+import com.auth0.jwk.JwkProvider;
+import com.auth0.jwk.JwkProviderBuilder;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Base64;
+import java.util.concurrent.TimeUnit;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.WebUtils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
+@Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+
+    @Value("${cognito.userpool.id:defaultUserPoolId}")
+    private String userPoolId;
+
+    JwkProvider provider = new JwkProviderBuilder("https://cognito-idp.ap-southeast-1.amazonaws.com/" + userPoolId)
+            .cached(10, 24, TimeUnit.HOURS) // Cache up to 10 keys for 24 hours
+            .build();
+
+    @PostConstruct
+    public void init() {
+        System.out.println("userPoolId: " + userPoolId);
+        provider = createJwkProvider();
+    }
+
+    private JwkProvider createJwkProvider() {
+        return new JwkProviderBuilder("https://cognito-idp.ap-southeast-1.amazonaws.com/" + userPoolId)
+                .cached(10, 24, TimeUnit.HOURS)
+                .build();
+    }
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
+        if (WebUtils.getCookie(request, "access_token") == null || WebUtils.getCookie(request, "id_token") == null){
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String token = WebUtils.getCookie(request, "access_token").getValue();
         String id_token = WebUtils.getCookie(request, "id_token").getValue();
+
         if (token != null && validateToken(token) && validateToken(id_token)) {
             Claims claims = getClaimsFromToken(token);
             if (claims != null) {
@@ -34,9 +70,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 JwtAuthenticationToken authentication = new JwtAuthenticationToken(claims);
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-                httpRequest.setAttribute("id", JwkUtil.getValueFromTokenPayload(id_token, "sub"));
-                httpRequest.setAttribute("username", JwkUtil.getValueFromTokenPayload(id_token, "cognito:username"));
-                httpRequest.setAttribute("email", JwkUtil.getValueFromTokenPayload(id_token, "email"));
+                httpRequest.setAttribute("id", getValueFromTokenPayload(id_token, "sub"));
+                httpRequest.setAttribute("username", getValueFromTokenPayload(id_token, "cognito:username"));
+                httpRequest.setAttribute("email", getValueFromTokenPayload(id_token, "email"));
             }
         }
 
@@ -45,9 +81,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private boolean validateToken(String token) {
         try {
-//            logger.info(JwkUtil.getKidFromTokenHeader(token));
-            String kid = JwkUtil.getKidFromTokenHeader(token);
-            RSAPublicKey publicKey = JwkUtil.getPublicKey(kid);
+            String kid = getKidFromTokenHeader(token);
+            RSAPublicKey publicKey = getPublicKey(kid);
             Jwts.parser()
                     .verifyWith(publicKey)
                     .build()
@@ -55,15 +90,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return true;
         } catch (Exception e) {
             logger.info(e.toString());
-            logger.info("VALIDATING TOKEN FALSE");
             return false;
         }
     }
 
     private Claims getClaimsFromToken(String token) {
         try {
-            String kid = JwkUtil.getKidFromTokenHeader(token);
-            RSAPublicKey publicKey = JwkUtil.getPublicKey(kid);
+            String kid = getKidFromTokenHeader(token);
+            RSAPublicKey publicKey = getPublicKey(kid);
             return Jwts.parser()
                     .verifyWith(publicKey)
                     .build()
@@ -73,4 +107,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return null;
         }
     }
+
+
+
+
+    public RSAPublicKey getPublicKey(String kid) throws Exception {
+        Jwk jwk = provider.get(kid);
+        return (RSAPublicKey) jwk.getPublicKey();
+    }
+
+    public String getKidFromTokenHeader(String token) {
+        String[] parts = token.split("\\.");
+        JSONObject header = new JSONObject(decode(parts[0]));
+        JSONObject payload = new JSONObject(decode(parts[1]));
+        String signature = decode(parts[2]);
+        return header.getString("kid");
+    }
+
+    private String decode(String encodedString) {
+        return new String(Base64.getUrlDecoder().decode(encodedString));
+    }
+
+    public String getValueFromTokenPayload(String token, String key) {
+        String[] parts = token.split("\\.");
+        JSONObject payload = new JSONObject(decode(parts[1]));
+        return payload.getString(key);
+    }
+
 }

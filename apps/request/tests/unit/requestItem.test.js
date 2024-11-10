@@ -1,9 +1,9 @@
-const RequestItemService = require("../services/requestItemService");
-const RequestItem = require("../models/RequestItem");
+const RequestItemService = require("../../services/requestItemService");
+const RequestItem = require("../../models/RequestItem");
 const AWSMock = require("aws-sdk-mock");
 const AWS = require("aws-sdk");
 
-jest.mock("../models/RequestItem"); 
+jest.mock("../../models/RequestItem"); 
 
 describe("RequestItemService", () => {
   const notifyQueueUrl = process.env["NOTIFY_SQS"] = "https://mock-queue-url";

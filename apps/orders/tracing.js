@@ -7,6 +7,7 @@ const { OTLPMetricExporter } = require('@opentelemetry/exporter-metrics-otlp-grp
 const { Resource } = require('@opentelemetry/resources');
 const { PeriodicExportingMetricReader } = require("@opentelemetry/sdk-metrics");
 const { RuntimeNodeInstrumentation } = require("@opentelemetry/instrumentation-runtime-node");
+const { MongoDBInstrumentation } = require("@opentelemetry/instrumentation-mongodb");
 
 console.log("Tracing started for ORDERS");
 
@@ -17,10 +18,9 @@ const resource = new Resource({
 
 const traceExporter = new OTLPTraceExporter({ url: process.env.OTEL_HOST_URL });
 const metricExporter = new OTLPMetricExporter({ url: process.env.OTEL_HOST_URL });
-
 const metricReader = new PeriodicExportingMetricReader({
   exporter: metricExporter,
-  interval: 30000
+  exportIntervalMillis: 30000
 })
 
 const sdk = new opentelemetry.NodeSDK({
@@ -31,6 +31,7 @@ const sdk = new opentelemetry.NodeSDK({
   instrumentations: [
     new HttpInstrumentation(),
     new ExpressInstrumentation(),
+    new MongoDBInstrumentation(),
     new RuntimeNodeInstrumentation({
       monitoringPrecision: 5000,
     }),
@@ -47,7 +48,7 @@ const sdk = new opentelemetry.NodeSDK({
       },
     }),
   ],
-  serviceName: process.env.SERVICE,
+  serviceName: 'orders',
 });
 
 sdk.start();

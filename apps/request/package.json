@@ -13,6 +13,7 @@
     "@opentelemetry/instrumentation-amqplib": "^0.43.0",
     "@opentelemetry/instrumentation-express": "^0.44.0",
     "@opentelemetry/instrumentation-http": "^0.54.2",
+    "@opentelemetry/instrumentation-mongodb": "^0.48.0",
     "@opentelemetry/instrumentation-runtime-node": "^0.9.0",
     "@opentelemetry/resources": "^1.27.0",
     "@opentelemetry/sdk-metrics": "^1.27.0",
@@ -27,10 +28,10 @@
     "express": "^4.21.1",
     "http-errors": "~1.6.3",
     "mongodb": "^6.8.0",
+    "mongoose": "^8.8.0",
     "morgan": "~1.9.1",
     "orders": "file:",
     "stripe": "^16.10.0",
-    "mongoose": "^8.8.0",
     "token-verifier-mee-rebus": "^1.0.0"
   },
   "devDependencies": {

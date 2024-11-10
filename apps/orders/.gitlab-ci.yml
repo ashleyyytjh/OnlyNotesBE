@@ -36,10 +36,11 @@ orders-unit-tests:
   variables:
     STRIPE_SECRET_KEY: $STRIPE_SECRET_KEY
 
-order-service-integration-tests:
+orders-integration-tests:
   stage: test
   image: node:20-slim
   before_script:
+    - apt-get update && apt-get install -y docker-compose
     - cd ./apps/orders
     - npm install
     - npm run docker-build:integration  

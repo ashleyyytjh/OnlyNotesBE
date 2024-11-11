@@ -13,7 +13,7 @@ class OrderService {
             console.log('in order service');
             const order = await new Order(data);
             await order.save();
-            await publishOrderCreated(order._id, order);
+            await publishOrderCreated(`${order._id}`, order);
             console.log('in published message');
 
             return {

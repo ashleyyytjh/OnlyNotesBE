@@ -13,7 +13,7 @@ console.log("Tracing started for ORDERS");
 
 const resource = new Resource({
   'service.name': 'orders',
-  'environment': process.env.OTEL_ENVIRONMENT
+  'deployment.environment.name': process.env.OTEL_ENVIRONMENT || 'development'
 });
 
 const traceExporter = new OTLPTraceExporter({ url: process.env.OTEL_HOST_URL });

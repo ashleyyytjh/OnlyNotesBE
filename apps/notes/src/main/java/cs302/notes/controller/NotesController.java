@@ -64,6 +64,8 @@ public class NotesController {
     @PostMapping(value = "${currentApiPrefix}/notes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Response> createNotes(@Valid @ModelAttribute CreateNotesRequest request,
                                                 @RequestAttribute("id") String id) {
+        logger.info("Request body: {}", request);
+
         Response notesResponse = notesService.createNotes(request, id);
         logger.info("POST /notes 201");
         return new ResponseEntity<>(notesResponse, HttpStatus.CREATED);

@@ -63,12 +63,12 @@ public class MessageReceiver {
         correlateSpan(message);
         logger.info(String.format("Receiving message: %s", request));
         try {
-            System.out.println("Notes verified");
             Notes notes = repository.findBy_id(request.get_id())
                     .orElseThrow(() -> new NotesNotFoundException(request.get_id()));
             notes.setStatus(request.getStatus());
             repository.save(notes);
             messageSender.publishListingCompleted(request);
+            logger.info("Notes updated in Database");
         } catch (NotesNotFoundException e) {
             System.out.println("Notes no longer found");
         } catch (Exception e) {

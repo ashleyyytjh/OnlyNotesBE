@@ -1,13 +1,3 @@
-#module "remote-state-storage" {
-#  source = "./remote state"
-#  environment = var.environment
-#}
-
-#module "api-gateway" {
-#  source = "./api gateway"
-#  environment = var.environment
-#}
-
 module "ecr" {
   # Only create in production or staging
   count = (terraform.workspace == "production" || terraform.workspace == "staging") ? 1 : 0
@@ -16,13 +6,13 @@ module "ecr" {
   app_name = var.app_name
 }
 
-#module "ecs" {
-#  source = "./ecs"
-#  environment = var.environment
-#  app_name = var.app_name
-#  account_app_container_port = var.account_app_container_port
-#  availability_zones = var.availability_zones
-#}
+module "ecs" {
+ source = "./ecs"
+ environment = var.environment
+ app_name = var.app_name
+ account_app_container_port = var.account_app_container_port
+ availability_zones = var.availability_zones
+}
 
 module "cognito" {
   source = "./cognito"

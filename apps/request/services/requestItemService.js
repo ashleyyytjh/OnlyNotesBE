@@ -1,5 +1,6 @@
 const RequestItem = require("../models/RequestItem");
 const AWS = require('aws-sdk');
+const {getId} = require("token-verifier-mee-rebus");
 
 const sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
 const notifyQueueUrl = process.env["NOTIFY_SQS"];
@@ -13,6 +14,11 @@ class RequestItemService {
     // Only allow these characters ( alpha numbers _ - space )
     if (!regex.test(requestData.tag)) {
       throw new Error("validation error request tag");
+    }
+
+    const itemToCreate = await RequestItem.find({userId: user, tag: requestData.tag})
+    if(itemToCreate.length > 0) {
+      throw new Error("Request already exist");
     }
 
     try {
@@ -29,7 +35,13 @@ class RequestItemService {
     }
   }
 
-  static async findById(requestId) {
+  static async findById(requestId, user) {
+
+    const itemToFind = await RequestItem.findById(requestId)
+    if (itemToFind && itemToFind['userId'] !== user){
+      throw new Error("Request not found");
+    }
+
     try {
       // const exists = await RequestItem.exists({ _id: requestId })
       return await RequestItem.findById(requestId);
@@ -58,6 +70,14 @@ class RequestItemService {
     }
   }
 
+  static async findAllByUser(user) {
+    try {
+      return await RequestItem.find({userId: user});
+    } catch (error) {
+      throw new Error("Internal server error");
+    }
+  }
+
   static async update(user, requestId, requestData) {
     try {
       return await RequestItem.findByIdAndUpdate(requestId, requestData, {
@@ -68,7 +88,15 @@ class RequestItemService {
     }
   }
 
-  static async delete(requestId) {
+  static async delete(requestId, user) {
+
+    const itemToDelete = await RequestItem.findById(requestId)
+    console.log(itemToDelete['userId'])
+    console.log(user)
+    if (itemToDelete && itemToDelete['userId'] !== user){
+      throw new Error("Request not found");
+    }
+
     try {
       return await RequestItem.findByIdAndDelete(requestId);
     } catch (error) {

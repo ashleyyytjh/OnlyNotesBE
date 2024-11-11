@@ -171,9 +171,8 @@ ecs-production:
     - echo "Updating the service..."
     - aws ecs update-service --region "${AWS_DEFAULT_REGION}" --cluster "${STAGING_CLUSTER_NAME}" --service "${SERVICE_NAME_PROD}"  --task-definition "${TASK_DEFINITION_NAME_PROD}"
     - echo "Finish updating Task:${TASK_DEFINITION_NAME_PROD} Service:${SERVICE_NAME_PROD} Cluster:${STAGING_CLUSTER_NAME} with image:${ECR_REGISTRY}:${VERSION}"
-  only:
-    - main
   dependencies:
     - account-build
   rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
     - if: '$DEPLOY_ENV == "production"'

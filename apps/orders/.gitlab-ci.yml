@@ -4,6 +4,8 @@ stages:
   - scan
   - push
   - staging
+  - notification
+
 
 variables:
   SERVICE: "orders"
@@ -122,3 +124,11 @@ ecs-staging:
     - main
   dependencies:
     - orders-build
+
+failure_notification:
+  stage: notification
+  script:
+    - wget https://raw.githubusercontent.com/DiscordHooks/gitlab-ci-discord-webhook/master/send.sh
+    - chmod +x send.sh
+    - ./send.sh failure $ORDER_WEBHOOK_URL
+  when: on_failure

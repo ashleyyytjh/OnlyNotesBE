@@ -26,7 +26,7 @@ notes-validations-tests:
     - cd ./apps/notes
     - mvn compile
   script:
-    - mvn -Dtest=ValidationUnitTest test
+    - mvn -Dtest=ValidationUnitTests test
   allow_failure: true
   artifacts:
     when: always

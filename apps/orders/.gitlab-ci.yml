@@ -125,7 +125,7 @@ ecs-staging:
   dependencies:
     - orders-build
 
-success_notification:
+success:
   stage: notification
   script:
     - echo "Pipeline passed, no notification sent."
@@ -137,6 +137,6 @@ failure_notification:
   script:
     - wget https://raw.githubusercontent.com/DiscordHooks/gitlab-ci-discord-webhook/master/send.sh
     - chmod +x send.sh
-    - ./send.sh failure $WEBHOOK_URL
+    - ./send.sh failure $ORDER_WEBHOOK_URL
   when: on_failure
   allow_failure: true 

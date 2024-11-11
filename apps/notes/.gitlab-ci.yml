@@ -148,6 +148,13 @@ ecs-staging:
   dependencies:
     - notes-build
 
+success:
+  stage: notification
+  script:
+    - echo "Pipeline passed, no notification sent."
+  when: on_success
+  allow_failure: true  
+
 failure_notification:
   stage: notification
   script:
@@ -155,4 +162,4 @@ failure_notification:
     - chmod +x send.sh
     - ./send.sh failure $NOTES_WEBHOOK_URL
   when: on_failure
-  allow_failure: true
+  allow_failure: true 

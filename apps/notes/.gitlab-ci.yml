@@ -27,7 +27,7 @@ notes-validations-tests:
     - mvn compile
   script:
     - mvn -Dtest=ValidationUnitTests test
-  allow_failure: true
+  allow_failure: false
   artifacts:
     when: always
     paths:

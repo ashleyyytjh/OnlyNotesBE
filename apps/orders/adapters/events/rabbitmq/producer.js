@@ -24,6 +24,7 @@ async function publish(id, event, data) {
     ch.publish("orders", rk, Buffer.from(JSON.stringify(data)), {
       correlationId: `${id}`
     });
+    console.log('buffer', Buffer.from(JSON.stringify(data)));
     console.log("Published %s event for transaction id: %s", event, id);
     return true;
   } catch (err) {

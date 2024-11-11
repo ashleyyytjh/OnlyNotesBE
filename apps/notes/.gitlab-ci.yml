@@ -18,6 +18,20 @@ include:
   - template: Jobs/Container-Scanning.gitlab-ci.yml
   - template: Jobs/SAST.gitlab-ci.yml
 
+notes-validations-tests:
+  stage: test
+  image: maven:3.6.3-openjdk-17
+  before_script:
+    - cd ./apps/notes
+    - mvn verify
+  script:
+    - mvn -Dtest=ValidationsTest test
+  allow_failure: false
+  artifacts:
+    when: always
+    paths:
+      - coverage/
+
 notes-unit-tests:
  stage: test
  image: maven:3.6.3-openjdk-17
@@ -26,7 +40,6 @@ notes-unit-tests:
    - mvn verify
  script:
    - mvn -Dtest=NotesServiceUnitTests test
-   - mvn -Dtest=ValidationsTest test
  allow_failure: false
  artifacts:
    when: always

@@ -13,6 +13,7 @@ console.log("Tracing started for ORDERS");
 
 const resource = new Resource({
   'service.name': 'orders',
+  'service.environment': process.env.OTEL_ENVIRONMENT || 'development',
   'deployment.environment.name': process.env.OTEL_ENVIRONMENT || 'development',
   'deployment.environment': process.env.OTEL_ENVIRONMENT || 'development'
 });

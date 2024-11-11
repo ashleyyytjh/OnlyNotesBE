@@ -22,7 +22,7 @@ async function stripeWebhook  (req, res){
 
         } else {
             const paymentIntent = event.data.object;
-            await OrderService.updateOrderStatus(paymentIntent.metadata._id, 'failed');
+            await OrderService.updateOrderStatus(paymentIntent.metadata.orderId, 'failed');
             console.log('PaymentIntent failed:', paymentIntent);
         }
         res.json({ received: true });

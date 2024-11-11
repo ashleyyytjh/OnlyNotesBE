@@ -31,10 +31,11 @@ async function configMQ() {
 
 const handleOrderSuccess = async (message) => {
   ch.ack(message);
+  console.log(message);
   try {
     const data = JSON.parse(message.content.toString());
     console.log(data);
-    const buyer = await retrieveUser(data.buyerId);
+    const buyer = await retrieveUser(data.userId);
     const seller = await retrieveUser(data.fkAccountOwner);
     const url = data.url;
     const { file_key, bucket } = getFileDetails(data.url);

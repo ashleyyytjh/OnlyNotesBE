@@ -25,7 +25,7 @@ flake8:
     - python -V
     - python -m pip install flake8
   script:
-    - flake8 src | tee flake8_report.txt
+    - flake8 ./app.py | tee flake8_report.txt
   artifacts:
     when: on_failure
     paths:
@@ -39,7 +39,7 @@ pylint:
     - python -m pip install -r requirements.txt
     - python -m pip install pylint
   script:
-    - pylint --fail-under=6 src | tee pylint_report.txt
+    - pylint --fail-under=6 ./app.py | tee pylint_report.txt
   artifacts:
     when: always
     paths:

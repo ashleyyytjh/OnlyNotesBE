@@ -5,7 +5,11 @@ const dotenv = require('dotenv')
 
 const app = express();
 
-const cookieDomain = "." + process.env['domain']
+let cookieDomain = "." + process.env['domain']
+
+if (process.env['environment'] === 'development'){
+    cookieDomain = undefined
+}
 
 app.use(cookieParser());
 dotenv.config()

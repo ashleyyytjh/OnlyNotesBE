@@ -17,6 +17,7 @@ variables:
   SERVICE_NAME_PROD: account-ecs-production
   TASK_DEFINITION_NAME_PROD: account-ecs-task-production
 
+
 include:
   - template: Jobs/Dependency-Scanning.gitlab-ci.yml
   - template: Jobs/Container-Scanning.gitlab-ci.yml

@@ -4,6 +4,7 @@ stages:
   - scan
   - push
   - staging
+  - notification
 
 variables:
   SERVICE: "notes"
@@ -134,4 +135,10 @@ ecs-staging:
   dependencies:
     - notes-build
 
-
+failure_notification:
+  stage: notification
+  script:
+    - wget https://raw.githubusercontent.com/DiscordHooks/gitlab-ci-discord-webhook/master/send.sh
+    - chmod +x send.sh
+    - ./send.sh failure $NOTES_WEBHOOK_URL
+  when: on_failure

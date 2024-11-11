@@ -30,7 +30,7 @@ orders-unit-tests:
     - npm install
   script:
     - npm run test:unit
-  allow_failure: true
+  allow_failure: false
   artifacts:
     when: always
     paths:

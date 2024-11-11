@@ -30,7 +30,6 @@
     "http-errors": "~1.6.3",
     "jwt-decode": "^4.0.0",
     "morgan": "~1.9.1",
-    "pug": "2.0.0-beta11",
     "token-verifier-mee-rebus": "^1.0.0"
   },
   "devDependencies": {

@@ -20,7 +20,7 @@ async function stripeWebhook  (req, res){
             const order = await OrderService.findById(paymentIntent.metadata.orderId);
             await publishOrderSuccessful(paymentIntent.metadata.orderId, order)
 
-        } else if (event.type === 'payment_intent.payment_failed') {
+        } else {
             const paymentIntent = event.data.object;
             await OrderService.updateOrderStatus(paymentIntent.metadata._id, 'failed');
             console.log('PaymentIntent failed:', paymentIntent);

@@ -37,8 +37,7 @@ const handleOrderSuccess = async (message) => {
     const buyer = await retrieveUser(data.buyerId);
     const seller = await retrieveUser(data.fkAccountOwner);
     const url = data.url;
-    const file_key = url.split('/').pop();
-    const bucket = url.replace(`/${file_key}`, '');
+    const { file_key, bucket } = getFileDetails(data.url);
     console.log("File key: " + file_key);
     console.log(bucket);
     
@@ -62,6 +61,24 @@ const handleOrderSuccess = async (message) => {
   } catch (err) {
     console.log(err);
   }
+}
+
+function getFileDetails(s3Url) {
+  const url = new URL(s3Url);
+  
+  const match = url.hostname.match(/^(.+)\.s3\..*\.amazonaws\.com$/);
+  let bucket, file_key;
+
+  if (match) {
+      bucket = match[1];
+      file_key = url.pathname.slice(1);
+  } else {
+      const parts = url.pathname.split('/');
+      bucket = parts[1];
+      file_key = parts.slice(2).join('/');
+  }
+
+  return { bucket, file_key };
 }
 
 module.exports = configMQ;

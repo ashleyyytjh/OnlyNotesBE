@@ -8,7 +8,6 @@ import json
 import queue
 import boto3
 import logging
-import traceback
 
 from urllib.parse import urlparse
 from dataclasses import dataclass
@@ -299,7 +298,6 @@ def on_message(ch: Channel, method, properties, body: bytes) -> None:
             queue.put(listing)
             # ch.basic_ack(delivery_tag=method.delivery_tag)
         except Exception as e:
-            traceback.print_exc()
             logging.error(e)
         finally:
             delete_file_from_local(local_path)
@@ -335,7 +333,7 @@ def producer() -> None:
             )
 
         except Exception as e:
-            logging.error("Caught: %s", e.__traceback__)
+            logging.error("Caught: %s", e)
 
 consumer = threading.Thread(target=consumer, daemon=True)
 producer = threading.Thread(target=producer, daemon=True)

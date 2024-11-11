@@ -139,8 +139,6 @@ failure_notification:
   allow_failure: true 
 
 
-
-
 ecs-production:
   image: docker:20.10.16
   services:
@@ -169,10 +167,8 @@ ecs-production:
     - echo "Registering new container definition..."
     - aws ecs register-task-definition --region "${AWS_DEFAULT_REGION}" --family "${TASK_DEFINITION_NAME_PROD}" --container-definitions "${NEW_CONTAINER_DEFINITION}" --cpu "${CPU}" --memory "${MEMORY}" --requires-compatibilities "${REQUIRES_COMPATIBILITIES}" --task-role-arn "${TASK_ROLE_ARN}" --execution-role-arn "${EXECUTION_ROLE_ARN}" --network-mode "${NETWORK_MODE}" --runtime-platform "${RUNTIME_PLATFORM}"
     - echo "Updating the service..."
-    - aws ecs update-service --region "${AWS_DEFAULT_REGION}" --cluster "${STAGING_CLUSTER_NAME}" --service "${SERVICE_NAME_PROD}"  --task-definition "${TASK_DEFINITION_NAME_PROD}"
-    - echo "Finish updating Task:${TASK_DEFINITION_NAME_PROD} Service:${SERVICE_NAME_PROD} Cluster:${STAGING_CLUSTER_NAME} with image:${ECR_REGISTRY}:${VERSION}"
+    - aws ecs update-service --region "${AWS_DEFAULT_REGION}" --cluster "${PRODUCTION_CLUSTER_NAME}" --service "${SERVICE_NAME_PROD}"  --task-definition "${TASK_DEFINITION_NAME_PROD}"
+    - echo "Finish updating Task:${TASK_DEFINITION_NAME_PROD} Service:${SERVICE_NAME_PROD} Cluster:${PRODUCTION_CLUSTER_NAME} with image:${ECR_REGISTRY}:${VERSION}"
   dependencies:
     - account-build
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-    - if: '$DEPLOY_ENV == "production"'
+  when: manual

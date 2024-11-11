@@ -1,106 +1,65 @@
-
-resource "aws_iam_role" "ecs_task_execution_role" {
-  name               = "${var.app_name}_ecs_task_execution_role_${var.environment}"
-  assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
-}
-
-resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
-  role       = aws_iam_role.ecs_task_execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
-
-resource "aws_alb" "application_load_balancer" {
-  name               = "${var.app_name}_application_load_balancer_${var.environment}"
-  load_balancer_type = "application"
-  subnets = [
-    aws_default_subnet.default_subnet_a.id,
-    aws_default_subnet.default_subnet_b.id,
-    aws_default_subnet.default_subnet_c.id
+resource "aws_lb" "onlynotes-alb" {
+  client_keep_alive    = 3600
+  idle_timeout         = 60
+  internal             = false
+  ip_address_type      = "ipv4"
+  load_balancer_type   = "application"
+  name                 = "${var.app_name}-ecs-lb-${var.environment}"
+  name_prefix          = null
+  preserve_host_header = false
+  security_groups = [
+    "sg-04e5c3d61d409c3b6"
   ]
-  security_groups = [aws_security_group.load_balancer_security_group.id]
+  subnets = [
+    "subnet-0161ca9ff7e35d928",
+    "subnet-01c958fe22a72a561",
+    "subnet-07da9d2924f17ec9c"
+  ]
+  tags = {}
+  tags_all = {}
+
 }
 
-resource "aws_security_group" "load_balancer_security_group" {
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-
-resource "aws_default_vpc" "default_vpc" {}
-
-resource "aws_default_subnet" "default_subnet_a" {
-  availability_zone = var.availability_zones[0]
-}
-resource "aws_default_subnet" "default_subnet_b" {
-  availability_zone = var.availability_zones[1]
-}
-resource "aws_default_subnet" "default_subnet_c" {
-  availability_zone = var.availability_zones[2]
-}
-
-resource "aws_lb_target_group" "account_target_group" {
-  name        = "${var.app_name}_alb_target_group_${var.environment}"
-  port        = var.account_app_container_port
-  protocol    = "HTTP"
-  target_type = "ip"
-  vpc_id      = aws_default_vpc.default_vpc.id
-}
-
-resource "aws_ecs_service" "account_service" {
-  name        = "${var.app_name}_account_service_${var.environment}"
-  cluster         = aws_ecs_cluster.account_app_cluster.id
-  task_definition = aws_ecs_task_definition.account_app_task.arn
-  launch_type     = "FARGATE"
-  desired_count   = 1
-
-  load_balancer {
-    target_group_arn = aws_lb_target_group.account_target_group.arn
-    container_name   = aws_ecs_task_definition.account_app_task.family
-    container_port   = var.account_app_container_port
-  }
-
-  network_configuration {
-    subnets          = ["${aws_default_subnet.default_subnet_a.id}", "${aws_default_subnet.default_subnet_b.id}", "${aws_default_subnet.default_subnet_c.id}"]
-    assign_public_ip = true
-    security_groups  = ["${aws_security_group.service_security_group.id}"]
+resource "aws_acm_certificate" "onlynotes_lb_cert" {
+  domain_name   = "apis.onlynotes.net"
+  key_algorithm = "RSA_2048"
+  subject_alternative_names = [
+    "apis.onlynotes.net",
+  ]
+  options {
+    certificate_transparency_logging_preference = "ENABLED"
   }
 }
 
 
+resource "aws_lb_listener" "onlynotes_lb_listener" {
+  load_balancer_arn = aws_lb.onlynotes-alb.arn
+  certificate_arn   = aws_acm_certificate.onlynotes_lb_cert.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  tags = {}
+  tags_all = {}
 
-resource "aws_lb_listener" "listener" {
-  load_balancer_arn = aws_alb.application_load_balancer.arn
-  port              = "80"
-  protocol          = "HTTP"
   default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.account_target_group.arn
-  }
-}
+    order = 1
+    type  = "forward"
 
-resource "aws_security_group" "service_security_group" {
-  ingress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    security_groups = ["${aws_security_group.load_balancer_security_group.id}"]
+    forward {
+      stickiness {
+        duration = 3600
+        enabled  = false
+      }
+      target_group {
+        arn    = "arn:aws:elasticloadbalancing:ap-southeast-1:211125709264:targetgroup/temp/9db0d7f51b6192b8"
+        weight = 1
+      }
+    }
   }
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+  mutual_authentication {
+    ignore_client_certificate_expiry = false
+    mode                             = "off"
+    trust_store_arn                  = null
   }
 }

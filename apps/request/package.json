@@ -32,7 +32,7 @@
     "morgan": "~1.9.1",
     "orders": "file:",
     "stripe": "^16.10.0",
-    "token-verifier-mee-rebus": "^1.0.0"
+    "token-verifier-mee-rebus": "^1.0.3"
   },
   "devDependencies": {
     "aws-sdk-mock": "^6.2.0",

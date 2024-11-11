@@ -1,9 +1,10 @@
 const RequestItemService = require('../services/requestItemService');
-const {getEmail} = require("token-verifier-mee-rebus")
+const {getId, getEmail, getUsername} = require('token-verifier-mee-rebus');
+
 async function getRequestItemById(req, res) {
   try {
     const { requestId } = req.params;
-    const requestItem = await RequestItemService.findById(requestId)
+    const requestItem = await RequestItemService.findById(requestId, getId(req))
     res.status(200).json(requestItem);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -11,8 +12,9 @@ async function getRequestItemById(req, res) {
 }
 
 async function createRequest(req, res) {
-  const userId = "test-user2";
+  const userId = getId(req);
   const email = getEmail(req);
+
   try {
     const requestItem = await RequestItemService.createRequest(userId, req.body, email);
     res.status(201).json({ message: 'Request created successfully', requestItem });
@@ -23,7 +25,8 @@ async function createRequest(req, res) {
 
 async function getAllRequestItem(req, res) {
   try {
-      const requestItems = await RequestItemService.findAll();
+      const user = getId(req)
+      const requestItems = await RequestItemService.findAllByUser(user);
       res.status(200).json(requestItems);
   } catch (error) {
     res.status(500).json({ message: 'Internal server error' });
@@ -31,9 +34,10 @@ async function getAllRequestItem(req, res) {
 }
 
 async function updateRequestById(req, res) {
-  const userId = "test-user";
+
   const {requestId} = req.params;
   const updateData = req.body;
+  const userId = getId(req);
 
   try {
     const updatedRequest = await RequestItemService.update(userId, requestId, updateData);
@@ -46,10 +50,10 @@ async function updateRequestById(req, res) {
 async function deleteRequestById(req, res) {
   try {
     const {requestId} = req.params;
-    const requestItem = await RequestItemService.delete(requestId);
+    const requestItem = await RequestItemService.delete(requestId, getId(req));
     res.status(200).json({ message: 'Request deleted successfully', requestItem });
   } catch (error) {
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: error.message });
   }
 }
 

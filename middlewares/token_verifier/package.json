@@ -1,6 +1,6 @@
 {
   "name": "token-verifier-mee-rebus",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -13,8 +13,6 @@
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
-    "jwt-decode": "^4.0.0",
-    "token_verifier": "file:",
-    "token-verifier-mee-rebus": "file:"
+    "jwt-decode": "^4.0.0"
   }
 }

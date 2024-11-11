@@ -22,31 +22,38 @@ async function configMQ() {
 
     await ch.assertQueue(orderSuccessQ);
     ch.bindQueue(orderSuccessQ, 'orders', 'orders.email');
-    ch.consume(orderSuccessQ, handleOrderScuess)
+    ch.consume(orderSuccessQ, handleOrderSuccess)
 
   } catch (err) {
     console.log(err);
   }
 }
 
-const handleOrderScuess = async (message) => {
+const handleOrderSuccess = async (message) => {
   ch.ack(message);
   try {
     const data = JSON.parse(message.content.toString());
     console.log(data);
     const buyer = await retrieveUser(data.buyerId);
-    const seller = await retrieveUser(data.sellerId);
+    const seller = await retrieveUser(data.fkAccountOwner);
+    const url = data.url;
+    const file_key = url.split('/').pop();
+    const bucket = url.replace(`/${file_key}`, '');
+    console.log("File key: " + file_key);
+    console.log(bucket);
     
     const payload = {
-      orderID: data._id,
-      bucket: data.bucket,
-      file_key: data.file_key,
-      notes: data.notes,
+      orderID: data._id.toString(),
+      userId: data.userId,
+      bucket: bucket,
+      file_key: file_key,
+      course: data.categoryCode,
+      notes: data.title,
       buyerEmail: buyer.email,
       buyerName: buyer.username,
       sellerEmail: seller.email,
       sellerName: seller.username,
-      price: data.orderPrice,
+      price: data.price,
     }
     const ok = await sns.publish(JSON.stringify(payload))
     if (!ok) {

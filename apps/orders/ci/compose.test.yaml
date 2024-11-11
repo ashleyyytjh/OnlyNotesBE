@@ -1,18 +1,4 @@
 services:
-  orders:
-    build:
-      context: ..
-      dockerfile: ci/Dockerfile
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-#      mongo:
-#        condition: service_healthy
-    ports:
-      - 3000:3000
-    environment:
-      MONGODB_URI: mongodb://root:example@host.docker.internal:27017/test_db?authSource=admin
-
   mongo:
     image: mongo
     ports:
@@ -20,11 +6,20 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
-#    healthcheck:
-#      test: ["CMD", "mongo", "--username", "root", "--password", "example", "--eval", "db.runCommand({ ping: 1 })"]
-#      interval: 30s
-#      timeout: 10s
-#      retries: 3
+      MONGO_INITDB_DATABASE: test_db
+
+  orders:
+    build:
+      context: ../
+      dockerfile: ci/Dockerfile
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - 3000:3000
+    environment:
+      MONGODB_URI: mongodb://root:example@mongo:27017/test_db?authSource=admin  
+      STRIPE_SECRET_KEY: sk_test_4eC39HqLyjWDarjtT1zdp7dc
 
   rabbitmq:
     image: rabbitmq:management
@@ -39,6 +34,3 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-
-
-  

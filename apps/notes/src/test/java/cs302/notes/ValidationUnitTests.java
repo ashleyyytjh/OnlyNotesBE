@@ -22,7 +22,7 @@ import java.util.Set;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-public class ValidationsTests {
+public class ValidationUnitTests {
 
     private Validator validator;
 

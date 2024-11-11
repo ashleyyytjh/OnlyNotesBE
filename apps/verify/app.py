@@ -47,7 +47,7 @@ VECTOR_STORE_ID = os.getenv("VECTOR_STORE_ID")
 API_HEADER = '/api/v1'
 UPLOAD_FOLDER = os.getcwd() + '/uploads'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'json', 'xlsx', 'doc', 'docx', 'ppt', 'pptx'}
-MAX_COMPLETION_TOKENS = 200
+MAX_COMPLETION_TOKENS = 100
 
 # Specify common errors
 fileNotUploadedError = "No file uploaded error"
@@ -143,7 +143,7 @@ def create_run(thread_id: str):
                 client.beta.threads.messages.create(
                     thread_id=thread_id,
                     role="user",
-                    content="Please ensure that response is in the JSON format is kept."
+                    content='''Please ensure that response is in the """JSON format""" of {"verified": <verified>}.'''
                 )
                 # Start a new run
                 run = client.beta.threads.runs.create(thread_id=thread_id, assistant_id=VERIFIER_ASSISTANT_ID, max_completion_tokens=MAX_COMPLETION_TOKENS)

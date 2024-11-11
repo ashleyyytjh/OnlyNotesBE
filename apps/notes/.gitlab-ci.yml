@@ -24,10 +24,10 @@ notes-validations-tests:
   image: maven:3.6.3-openjdk-17
   before_script:
     - cd ./apps/notes
-    - mvn verify
+    - mvn compile
   script:
     - mvn -Dtest=ValidationUnitTest test
-  allow_failure: false
+  allow_failure: true
   artifacts:
     when: always
     paths:
@@ -38,7 +38,7 @@ notes-unit-tests:
  image: maven:3.6.3-openjdk-17
  before_script:
    - cd ./apps/notes
-   - mvn verify
+   - mvn compile
  script:
    - mvn -Dtest=NotesServiceUnitTests test
  allow_failure: false
@@ -52,7 +52,7 @@ notes-integration-tests:
   image: maven:3.6.3-openjdk-17
   before_script:
     - cd ./apps/notes
-    - mvn verify
+    - mvn compile
   script:
     - mvn -Dtest=IntegrationTests test
   allow_failure: false

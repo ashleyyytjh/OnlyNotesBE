@@ -8,6 +8,7 @@ import json
 import queue
 import boto3
 import logging
+import traceback
 
 from urllib.parse import urlparse
 from dataclasses import dataclass
@@ -46,7 +47,7 @@ VECTOR_STORE_ID = os.getenv("VECTOR_STORE_ID")
 API_HEADER = '/api'
 UPLOAD_FOLDER = os.getcwd() + '/uploads'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'json', 'xlsx', 'doc', 'docx', 'ppt', 'pptx'}
-MAX_COMPLETION_TOKENS = 50
+MAX_COMPLETION_TOKENS = 200
 
 # Specify common errors
 fileNotUploadedError = "No file uploaded error"
@@ -175,7 +176,7 @@ def create_run(thread_id: str):
 def run_assistant(file):
     if file is None: raise ValueError(fileNotUploadedError)
     # Create messages
-    messages = [{"role": "user", "content": f'''Given the file id """{file.id}""", verify if the file is appropriate based on the system instructions. Response must be in JSON format of {{"verified":<verified>}} is kept.'''}]
+    messages = [{"role": "user", "content": f'''Given the file id """{file.id}""", verify if the file is appropriate and return response in """JSON""" format of {{"verified":<verified>}}.'''}]
     # Create thread to run
     thread = client.beta.threads.create(messages=messages)
     # Create run
@@ -272,16 +273,21 @@ def on_message(ch: Channel, method, properties, body: bytes) -> None:
 
         parsed_url = urlparse(listing.url)
         bucket = parsed_url.netloc.split('.')[0]
-        key = parsed_url.path.lstrip('/')
+        client_id, key = parsed_url.path.lstrip('/').split("/")
+        print("Client id:", client_id, ", Key:", key)
 
         if not os.path.exists(f"{os.getcwd()}/tmp"):
             os.mkdir(f"{os.getcwd()}/tmp")
+            if not os.path.exists(f"{os.getcwd()}/tmp/{client_id}"):
+                os.mkdir(f"{os.getcwd()}/tmp/{client_id}")
 
-        local_path = f"{os.getcwd()}/tmp/{key}"
+        local_path = os.getcwd() + '\\tmp\\' + key
+        print('Key:', key)
+        print('LocalPath:', local_path)
+
         try:
-            s3.download_file(bucket, key, local_path)
+            s3.download_file(bucket, client_id + "/" + key, local_path)
             file = upload_file_to_openai(local_path)
-            delete_file_from_local(local_path)
             json_response = run_assistant(file=file)
             delete_file_from_vector_store(file=file)
             verified = json_response['verified']
@@ -293,7 +299,10 @@ def on_message(ch: Channel, method, properties, body: bytes) -> None:
             queue.put(listing)
             # ch.basic_ack(delivery_tag=method.delivery_tag)
         except Exception as e:
+            traceback.print_exc()
             logging.error(e)
+        finally:
+            delete_file_from_local(local_path)
       
 def consumer() -> None:
     conn = pika.BlockingConnection(pika.URLParameters(url))

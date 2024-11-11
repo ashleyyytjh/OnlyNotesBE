@@ -45,8 +45,8 @@ public class MessageReceiver {
         logger.info(String.format("Receiving message: %s", request));
         try {
             // Append stuff for notes and forward to eddy
-            Notes notes = repository.findBy_id(request.getNotesId())
-                    .orElseThrow(() -> new NotesNotFoundException(request.getNotesId()));
+            Notes notes = repository.findBy_id(request.getNoteId())
+                    .orElseThrow(() -> new NotesNotFoundException(request.getNoteId()));
             OrdersNotesSuccess ordersNotesSuccess = new OrdersNotesSuccess(request, notes);
             messageSender.publishEmailClients(ordersNotesSuccess);
 

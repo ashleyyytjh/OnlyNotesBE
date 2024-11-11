@@ -1,6 +1,7 @@
 stages:
   - trigger
   - notification 
+  - production
 
 trigger_orders:
   stage: trigger
@@ -52,6 +53,7 @@ trigger_verify:
   rules:
     - changes:
         - apps/verify/**/*
+
 
 success_notification:
   stage: notification  

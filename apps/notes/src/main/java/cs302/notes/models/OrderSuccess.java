@@ -15,8 +15,8 @@ public class OrderSuccess {
     private ObjectId _id;
 
     // orderId stores the id of the orders
-    private String userId;
+    private String buyerId;
 
     // notesId stores the id of the notes
-    private String notesId;
+    private String noteId;
 }

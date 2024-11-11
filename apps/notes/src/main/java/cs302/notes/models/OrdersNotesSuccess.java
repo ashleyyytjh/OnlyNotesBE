@@ -42,8 +42,8 @@ public class OrdersNotesSuccess {
     // Constructor from OrderSuccess object and Notes object
     public OrdersNotesSuccess(OrderSuccess orderSuccess, Notes notes) {
         this._id = orderSuccess.get_id();
-        this.userId = orderSuccess.getUserId();
-        this.notesId = orderSuccess.getNotesId();
+        this.userId = orderSuccess.getBuyerId();
+        this.notesId = orderSuccess.getNoteId();
         this.fkAccountOwner = notes.getFkAccountOwner();
         this.title = notes.getTitle();
         this.description = notes.getDescription();

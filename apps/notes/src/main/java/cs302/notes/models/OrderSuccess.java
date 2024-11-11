@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.bson.types.ObjectId;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class OrderSuccess {
     // _id stores the monitoring correlation email
-    private String _id;
+    private ObjectId _id;
 
     // orderId stores the id of the orders
     private String userId;

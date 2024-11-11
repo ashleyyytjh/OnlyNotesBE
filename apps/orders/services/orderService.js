@@ -13,7 +13,9 @@ class OrderService {
             console.log('in order service');
             const order = await new Order(data);
             await order.save();
-            await publishOrderCreated(order._id, order);
+            const orderWithStringId = { ...order.toObject(), _id: order._id.toString() };
+            console.log('orderWithStringId ', orderWithStringId)
+            await publishOrderCreated(`${order._id}`, orderWithStringId);
             console.log('in published message');
 
             return {

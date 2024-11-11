@@ -2,14 +2,14 @@ import json
 import os
 import time
 from typing import Any, Dict
-import pika
-import threading
-import queue
-import boto3
 import logging
-
+import queue
 from urllib.parse import urlparse
 from dataclasses import dataclass
+import pika
+import threading
+import boto3
+
 from pika.channel import Channel
 from dotenv import load_dotenv
 from flask import Flask, jsonify
@@ -49,7 +49,8 @@ amqp_queue = os.getenv("RABBITMQ_QUEUE")
 # Specify global variables
 API_HEADER = '/api/v1'
 UPLOAD_FOLDER = os.getcwd() + '/uploads'
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'json', 'xlsx', 'doc', 'docx', 'ppt', 'pptx'}
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'json', 'xlsx',
+                      'doc', 'docx', 'ppt', 'pptx'}
 MAX_COMPLETION_TOKENS = 100
 MAX_TRIES = 3
 
@@ -109,7 +110,8 @@ def upload_file_to_openai(path: str):
         logging.info("File not found in local directory")
         return None
     file = client.files.create(file=file_to_upload, purpose="assistants")
-    vector_store_file = client.beta.vector_stores.files.create(file_id=file.id, vector_store_id=VECTOR_STORE_ID)
+    vector_store_file = client.beta.vector_stores.files.create(file_id=file.id,
+                                                               vector_store_id=VECTOR_STORE_ID)
     time.sleep(0.5)
     logging.info(f"Vector Store File Run Status: {vector_store_file.status}")
     while vector_store_file.status != "completed":
@@ -152,13 +154,18 @@ def create_run(thread_id: str):
                     logging.warning(f"Verifier Run Status: {run.last_error.code}, Sleeping for 1min before trying again...")
                     time.sleep(60)
                 # Start a new run
-                run = client.beta.threads.runs.create(thread_id=thread_id, assistant_id=VERIFIER_ASSISTANT_ID, max_completion_tokens=MAX_COMPLETION_TOKENS)
+                run = client.beta.threads.runs.create(thread_id=thread_id,
+                                                      assistant_id=VERIFIER_ASSISTANT_ID,
+                                                      max_completion_tokens=MAX_COMPLETION_TOKENS)
             elif run.status == "expired":
                 logging.warning(f"Verifier Run Status: Fixing {run.status} run status...")
                 # Start a new run
-                run = client.beta.threads.runs.create(thread_id=thread_id, assistant_id=VERIFIER_ASSISTANT_ID, max_completion_tokens=MAX_COMPLETION_TOKENS)
+                run = client.beta.threads.runs.create(thread_id=thread_id,
+                                                      assistant_id=VERIFIER_ASSISTANT_ID,
+                                                      max_completion_tokens=MAX_COMPLETION_TOKENS)
             else:
-                run = client.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
+                run = client.beta.threads.runs.retrieve(thread_id=thread_id,
+                                                        run_id=run.id)
         time.sleep(0.5)
         # Print run status
         logging.info(f"Verifier Run Status: {run.status}")
@@ -177,7 +184,8 @@ def run_assistant(file):
     if file is None:
         raise ValueError(fileNotUploadedError)
     # Create messages
-    messages = [{"role": "user", "content": f'''Given the file id """{file.id}""", verify if the file is appropriate and return response in """JSON""" format of {{"verified":<verified>}}.'''}]
+    messages = [{"role": "user",
+                 "content": f'''Given the file id """{file.id}""", verify if the file is appropriate and return response in """JSON""" format of {{"verified":<verified>}}.'''}]
     # Create thread to run
     thread = client.beta.threads.create(messages=messages)
     # Create run
@@ -203,17 +211,21 @@ def run_assistant(file):
             json_response: dict = json.loads(new_message)
             if "verified" not in json_response.keys() or json_response['verified'] is None:
                 logging.warning("Verified field not found in JSON output.")
-                client.beta.threads.messages.create(thread_id=thread.id, role="user", content='''Please follow JSON format in system instructions.''')
+                client.beta.threads.messages.create(thread_id=thread.id,
+                                                    role="user",
+                                                    content='''Please follow JSON format in system instructions.''')
                 create_run(thread_id=thread.id)
             elif json_response['verified'] not in ["true", "false"]:
-                logging.warning("Verified field does not contain desired outputs.")
-                client.beta.threads.messages.create(thread_id=thread.id, role="user", content='''Verified field in JSON should only be "true" or "false".''')
+                logging.warning("Verified field has no desired outputs.")
+                client.beta.threads.messages.create(thread_id=thread.id,
+                                                    role="user",
+                                                    content='''Verified field in JSON should only be "true" or "false".''')
                 create_run(thread_id=thread.id)
             else:
                 return json_response
 
         except json.JSONDecodeError:
-            logging.warning("Error found when parsing response not in JSON format. Retrying...")
+            logging.warning('''Error found when parsing response not in JSON format. Retrying...''')
         curr += 1
     # Reaches here if num tries is more than curr tries
     logging.error('Max Tries has been reached.')
@@ -281,8 +293,12 @@ def consumer() -> None:
 
     ch.exchange_declare(exchange=exchange, exchange_type="topic", durable=True)
     ch.queue_declare(queue=amqp_queue)
-    ch.queue_bind(exchange=exchange, queue=amqp_queue, routing_key="listings.uploaded")
-    ch.basic_consume(queue=amqp_queue, on_message_callback=on_message, auto_ack=False)
+    ch.queue_bind(exchange=exchange,
+                  queue=amqp_queue,
+                  routing_key="listings.uploaded")
+    ch.basic_consume(queue=amqp_queue,
+                     on_message_callback=on_message,
+                     auto_ack=False)
     ch.start_consuming()
 
 
@@ -296,7 +312,7 @@ def producer() -> None:
             listing: ListingStatus = queue.get(block=True)
             if listing is None:
                 break
-            logging.info(f"Listing type: {type(listing)}, content: {listing.to_json()}")
+            logging.info(f"Listing content: {listing.to_json()}")
             properties = pika.BasicProperties(correlation_id=listing._id)
             ch.basic_publish(
                 exchange=exchange,

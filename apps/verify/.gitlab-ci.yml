@@ -142,3 +142,4 @@ failure_notification:
     - chmod +x send.sh
     - ./send.sh failure $VERIFY_WEBHOOK_URL
   when: on_failure
+  allow_failure: true

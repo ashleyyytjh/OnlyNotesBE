@@ -1,7 +1,6 @@
 stages:
   - trigger
   - notification 
-  - production
 
 trigger_orders:
   stage: trigger
@@ -54,67 +53,14 @@ trigger_verify:
     - changes:
         - apps/verify/**/*
 
-
-
-trigger_orders_production:
-  stage: production
+trigger_infra:
+  stage: trigger
   trigger:
-    include: apps/orders/.gitlab-ci.yml
+    include: infra/iac/.gitlab-ci.yml
     strategy: depend
-  variables:
-    DEPLOY_ENV: "production"
   rules:
     - changes:
-        - apps/orders/**/*
-  when: manual
-
-trigger_account_production:
-  stage: production
-  trigger:
-    include: apps/account/.gitlab-ci.yml
-    strategy: depend
-  variables:
-    DEPLOY_ENV: "production"
-  rules:
-    - changes:
-        - apps/account/**/*
-  when: manual
-
-trigger_notes_production:
-  stage: production
-  trigger:
-    include: apps/notes/.gitlab-ci.yml
-    strategy: depend
-  variables:
-    DEPLOY_ENV: "production"
-  rules:
-    - changes:
-        - apps/notes/**/*
-  when: manual
-
-trigger_request_production:
-  stage: production
-  trigger:
-    include: apps/request/.gitlab-ci.yml
-    strategy: depend
-  variables:
-    DEPLOY_ENV: "production"
-  rules:
-    - changes:
-        - apps/request/**/*
-  when: manual
-
-trigger_verify_production:
-  stage: production
-  trigger:
-    include: apps/verify/.gitlab-ci.yml
-    strategy: depend
-  variables:
-    DEPLOY_ENV: "production"
-  rules:
-    - changes:
-        - apps/verify/**/*
-  when: manual
+       - infra/iac/**/*
 
 success_notification:
   stage: notification  

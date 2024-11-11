@@ -12,7 +12,9 @@ const { MongoDBInstrumentation } = require("@opentelemetry/instrumentation-mongo
 console.log("Tracing started for REQUEST");
 
 const resource = new Resource({
-  'environment': process.env.OTEL_ENVIRONMENT
+  'deployment.environment.name': process.env.OTEL_ENVIRONMENT || 'development',
+  'deployment.environment': process.env.OTEL_ENVIRONMENT || 'development',
+  'service.environment': process.env.OTEL_ENVIRONMENT || 'development',
 });
 
 const traceExporter = new OTLPTraceExporter({ url: process.env.OTEL_HOST_URL });

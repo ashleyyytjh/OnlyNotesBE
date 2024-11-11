@@ -15,4 +15,5 @@ COPY . .
 EXPOSE 5000
 
 # Command to start the server
-CMD ["opentelemetry-instrument", "gunicorn", "-w", "1", "-b", "0.0.0.0:5000", "--log-level", "info", "--capture-output", "app:app"]
+# CMD ["opentelemetry-instrument", "gunicorn", "-w", "1", "-b", "0.0.0.0:5000", "--log-level", "info", "--capture-output", "app:app"]
+CMD ["opentelemetry-instrument", "python", "app.py"]

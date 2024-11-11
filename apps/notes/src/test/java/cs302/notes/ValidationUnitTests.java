@@ -1,11 +1,13 @@
 package cs302.notes;
 
 import cs302.notes.data.request.CreateNotesRequest;
+import cs302.notes.repository.NotesRepository;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +24,10 @@ import java.util.Set;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-public class ValidationsTests {
+public class ValidationUnitTests {
+
+    @Mock
+    private NotesRepository notesRepository;
 
     private Validator validator;
 

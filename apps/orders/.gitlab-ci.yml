@@ -39,7 +39,7 @@ orders-unit-tests:
     STRIPE_SECRET_KEY: $STRIPE_SECRET_KEY
 
 orders-integration-tests:
-  stage: rest
+  stage: test
   image: docker:27.1.1
   services:
     - docker:27.1.1-dind

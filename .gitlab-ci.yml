@@ -1,6 +1,7 @@
 stages:
   - trigger
   - notification 
+  - production
 
 trigger_orders:
   stage: trigger
@@ -53,14 +54,6 @@ trigger_verify:
     - changes:
         - apps/verify/**/*
 
-trigger_infra:
-  stage: trigger
-  trigger:
-    include: infra/iac/.gitlab-ci.yml
-    strategy: depend
-  rules:
-    - changes:
-       - infra/iac/**/*
 
 success_notification:
   stage: notification  

@@ -172,3 +172,4 @@ ecs-production:
   dependencies:
     - account-build
   when: manual
+  allow_failure: true

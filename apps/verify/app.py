@@ -42,11 +42,21 @@ OPENAI_KEY = os.getenv("OPENAI_KEY")
 VERIFIER_ASSISTANT_ID = os.getenv("VERIFIER_ASSISTANT_ID")
 VECTOR_STORE_ID = os.getenv("VECTOR_STORE_ID")
 
+# AMQP Pub/Sub
+protocol = os.getenv("RABBITMQ_PROTOCOL")
+host = os.getenv('RABBITMQ_HOST')
+username = os.getenv('RABBITMQ_USERNAME')
+password = os.getenv('RABBITMQ_PASSWORD')
+url = f"{protocol}://{username}:{password}@{host}"
+exchange = os.getenv("RABBITMQ_EXCHANGE")
+amqp_queue = os.getenv("RABBITMQ_QUEUE")
+
 # Specify global variables
 API_HEADER = '/api/v1'
 UPLOAD_FOLDER = os.getcwd() + '/uploads'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'json', 'xlsx', 'doc', 'docx', 'ppt', 'pptx'}
 MAX_COMPLETION_TOKENS = 100
+MAX_TRIES = 3
 
 # Specify common errors
 fileNotUploadedError = "No file uploaded error"
@@ -59,41 +69,40 @@ if not os.path.exists(UPLOAD_FOLDER):
 # Verify credentials with OpenAI
 client = OpenAI(api_key=OPENAI_KEY)
 
-#Specifies app to run for flask
+# Specifies app to run for flask
 app = Flask(__name__)
 CORS(app)
+queue = queue.Queue()
+s3 = boto3.client('s3')
+
+# Set up RabbitMq
+parameters = pika.URLParameters(url)
+parameters.socket_timeout = None
+parameters.heartbeat = 200
+
+# Specify Listing Status Object
+@dataclass
+class ListingStatus():
+    _id: str
+    status: str
+    url: str
+    price: int = None
+    categoryCode: str = None
+
+    def to_json(self) -> Dict[str, Any]:
+        return {
+            "_id": self._id,
+            "status": self.status,
+            "price": self.price,
+            "categoryCode": self.categoryCode,
+            "url": self.url
+        }
 
 
 @app.route("/health")
 def health_check():
     logging.info("health check")
     return jsonify({"message": "Verify Service is healthy"}), 200
-
-
-# Function to check filename and decide if its 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-def retrieve_and_save_file(request: Request): 
-    # Retrieve the file
-    if 'file' not in request.files:
-        # print(fileNotUploadedError)
-        logging.warning(fileNotUploadedError)
-        return jsonify({"message", fileNotUploadedError}), 400
-    file = request.files['file']
-    # Check if filename is valid
-    if file.filename == '' or not allowed_file(file.filename):
-        # print(invalidFileFormat)
-        logging.warning(invalidFileFormat)
-        return jsonify({"message": invalidFileFormat}), 400
-    # Save the file if valid
-    filename = secure_filename(file.filename)
-    path = UPLOAD_FOLDER + "/" + filename
-    if file and allowed_file(file.filename):
-        file.save(path)
-    return path
 
 
 def upload_file_to_openai(path: str):
@@ -120,12 +129,6 @@ def upload_file_to_openai(path: str):
     file_to_upload.close()
     return file
 
-
-def delete_file_from_local(path: str):
-    if os.path.exists(path):
-        os.remove(path)
-    else:
-        logging.info("The file does not exist")
 
 def create_run(thread_id: str):
     try: 
@@ -182,7 +185,8 @@ def run_assistant(file):
     create_run(thread_id=thread.id)
     # Retrieve the latest message
     messages = client.beta.threads.messages.list(thread_id=thread.id)
-    while (True):
+    curr = 1
+    while curr < MAX_TRIES:
         # Obtain response from messages
         response = messages.data[0]
         new_message = response.content[0].text.value
@@ -211,54 +215,22 @@ def run_assistant(file):
             
         except json.JSONDecodeError:
             logging.warning("Error found when parsing response not in JSON format. Retrying...")
+        curr += 1
+    # Reaches here if num tries is more than curr tries
+    logging.error('Max Tries has been reached.')
+
+
+
+def delete_file_from_local(path: str):
+    if os.path.exists(path):
+        os.remove(path)
+    else:
+        logging.info("The file does not exist")
 
 
 def delete_file_from_vector_store(file):
     client.files.delete(file_id=file.id)
 
-
-@app.route(API_HEADER + "/upload", methods=["POST"])
-def upload_file():
-    # Retrieve file from request and save to uploads dir
-    path = retrieve_and_save_file(request=request)
-    # Upload file to OpenAI
-    file = upload_file_to_openai(path=path)
-    # Delete file from uploads folder
-    delete_file_from_local(path=path)
-    # Run prompt with assistant
-    json_response = run_assistant(file=file)
-    # Delete file from vector store
-    delete_file_from_vector_store(file=file)
-    return jsonify({"message": json_response['verified']}), 200
-
-# AMQP Pub/Sub
-protocol = os.getenv("RABBITMQ_PROTOCOL")
-host = os.getenv('RABBITMQ_HOST')
-username = os.getenv('RABBITMQ_USERNAME')
-password = os.getenv('RABBITMQ_PASSWORD')
-url = f"{protocol}://{username}:{password}@{host}"
-exchange = os.getenv("RABBITMQ_EXCHANGE")
-amqp_queue = os.getenv("RABBITMQ_QUEUE")
-
-queue = queue.Queue()
-s3 = boto3.client('s3')
-
-@dataclass
-class ListingStatus():
-    _id: str
-    status: str
-    url: str
-    price: int = None
-    categoryCode: str = None
-
-    def to_json(self) -> Dict[str, Any]:
-        return {
-            "_id": self._id,
-            "status": self.status,
-            "price": self.price,
-            "categoryCode": self.categoryCode,
-            "url": self.url
-        }
 
 def on_message(ch: Channel, method, properties, body: bytes) -> None:
     ch.basic_ack(delivery_tag=method.delivery_tag)
@@ -270,6 +242,7 @@ def on_message(ch: Channel, method, properties, body: bytes) -> None:
         logging.info('Listing, %s', listing)
         app.logger.info(listing)
 
+        # time.sleep(90)
         parsed_url = urlparse(listing.url)
         bucket = parsed_url.netloc.split('.')[0]
         client_id, key = parsed_url.path.lstrip('/').split("/")
@@ -303,7 +276,7 @@ def on_message(ch: Channel, method, properties, body: bytes) -> None:
             delete_file_from_local(local_path)
       
 def consumer() -> None:
-    conn = pika.BlockingConnection(pika.URLParameters(url))
+    conn = pika.BlockingConnection(parameters)
     logging.info(f"Consumer Connected: {host}")
     ch = conn.channel()
 
@@ -314,7 +287,7 @@ def consumer() -> None:
     ch.start_consuming()
 
 def producer() -> None:
-    conn = pika.BlockingConnection(pika.URLParameters(url))
+    conn = pika.BlockingConnection(parameters)
     logging.info(f"Producer Connected: {host}")
     ch = conn.channel()
     ch.exchange_declare(exchange=exchange, exchange_type="topic", durable=True)

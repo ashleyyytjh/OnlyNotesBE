@@ -18,23 +18,32 @@ include:
   - template: Jobs/Container-Scanning.gitlab-ci.yml
   - template: Jobs/SAST.gitlab-ci.yml
 
+flake8:
+  stage: test
+  image: python:3.12-slim
+  before_script:
+    - python -V
+    - python -m pip install flake8
+  script:
+    - flake8 src | tee flake8_report.txt
+  artifacts:
+    when: on_failure
+    paths:
+      - flake8_report.txt
 
-# Jest tests
-# orders-unit-tests:
-#   stage: test
-#   image: node:20-slim
-#   before_script:
-#     - cd ./apps/orders
-#     - npm install
-#   script:
-#     - npm run test:unit
-#   allow_failure: true
-#   artifacts:
-#     when: always
-#     paths:
-#       - coverage/
-#   variables:
-#     STRIPE_SECRET_KEY: $STRIPE_SECRET_KEY
+pylint:
+  stage: test
+  image: python:3.12-slim
+  before_script:
+    - python -V
+    - python -m pip install -r requirements.txt
+    - python -m pip install pylint
+  script:
+    - pylint --fail-under=6 src | tee pylint_report.txt
+  artifacts:
+    when: always
+    paths:
+      - pylint_report.txt
 
 # Build Docker Image
 verify-build:

@@ -272,7 +272,25 @@ describe('OrderService', () => {
 
 describe('Consumer Tests', () => {
   beforeEach(() => {
-    jest
+    jest.clearAllMocks(); // Clear previous mock calls
+  });
+
+  describe('configConsumer', () => {
+    let mockChannel;
+    let mockConnection;
+    let notesFoundQ = 'notes-found';
+    beforeEach(() => {
+      // Create a mock channel
+      mockChannel = {
+        assertExchange: jest.fn(),
+        assertQueue: jest.fn(),
+        bindQueue: jest.fn(),
+        consume: jest.fn(),
+      };
+
+      // Create a mock connection
+      mockConnection = {
+        createChannel: jest.fn().mockResolvedValue(mockChannel),
       };
 
       // Mock the amqp.connect method

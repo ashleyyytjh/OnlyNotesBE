@@ -4,6 +4,7 @@ stages:
   - scan
   - push
   - staging
+  - notification
 
 variables:
   SERVICE: "notes"
@@ -18,19 +19,47 @@ include:
   - template: Jobs/Container-Scanning.gitlab-ci.yml
   - template: Jobs/SAST.gitlab-ci.yml
 
-notes-tests:
+notes-validations-tests:
+  stage: test
+  image: maven:3.6.3-openjdk-17
+  before_script:
+    - cd ./apps/notes
+    - mvn compile
+  script:
+    - mvn -Dtest=ValidationUnitTests test
+  allow_failure: false
+  artifacts:
+    when: always
+    paths:
+      - coverage/
+
+notes-unit-tests:
  stage: test
  image: maven:3.6.3-openjdk-17
  before_script:
    - cd ./apps/notes
-   - mvn verify
+   - mvn compile
  script:
-   - mvn test
+   - mvn -Dtest=NotesServiceUnitTests test
  allow_failure: false
  artifacts:
    when: always
    paths:
      - coverage/
+
+notes-integration-tests:
+  stage: test
+  image: maven:3.6.3-openjdk-17
+  before_script:
+    - cd ./apps/notes
+    - mvn compile
+  script:
+    - mvn -Dtest=IntegrationTests test
+  allow_failure: false
+  artifacts:
+    when: always
+    paths:
+      - coverage/
 
 # Build Docker Image
 notes-build:
@@ -119,4 +148,18 @@ ecs-staging:
   dependencies:
     - notes-build
 
+success:
+  stage: notification
+  script:
+    - echo "Pipeline passed, no notification sent."
+  when: on_success
+  allow_failure: true  
 
+failure_notification:
+  stage: notification
+  script:
+    - wget https://raw.githubusercontent.com/DiscordHooks/gitlab-ci-discord-webhook/master/send.sh
+    - chmod +x send.sh
+    - ./send.sh failure $NOTES_WEBHOOK_URL
+  when: on_failure
+  allow_failure: true 

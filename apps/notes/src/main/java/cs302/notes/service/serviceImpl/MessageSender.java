@@ -42,7 +42,7 @@ public class MessageSender {
     // Take info from Orders service and append information about notes (everything except id)
     public void publishEmailClients(OrdersNotesSuccess message) {
         logger.info(String.format("Publishing message: %s", message));
-        sendMessage(ordersExchange, "orders.email", message, message.get_id());
+        sendMessage(ordersExchange, "orders.email", message, message.get_id().toString());
         // rabbitTemplate.convertAndSend(ordersExchange, "orders.email", message);
     }
 

@@ -44,7 +44,6 @@ public class MessageReceiver {
         correlateSpan(message);
         logger.info(String.format("Receiving message: %s", request));
         try {
-            System.out.println("Forwarded signed url for notification");
             // Append stuff for notes and forward to eddy
             Notes notes = repository.findBy_id(request.getNotesId())
                     .orElseThrow(() -> new NotesNotFoundException(request.getNotesId()));

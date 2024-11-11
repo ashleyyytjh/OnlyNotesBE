@@ -6,6 +6,7 @@ var cookieParser = require('cookie-parser');
 var healthRouter = require('./routes/health')
 var requestItemRoute = require('./routes/requestItem')
 var notifyRoute = require('./routes/notify')
+const cors = require('cors');
 
 const connectDB = require('./config/db');
 const bodyParser = require("body-parser");
@@ -24,6 +25,11 @@ app.use(
       }
     })
 );
+
+app.use(cors({
+    origin: ['http://localhost:5173', 'https://staging.onlynotes.net', 'https://onlynotes.net'],
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());

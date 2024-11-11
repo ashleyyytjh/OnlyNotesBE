@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG NODE_VERSION=lts
+ARG NODE_VERSION=20
 
 ################################################################################
 # Base image
@@ -31,7 +31,7 @@ FROM base AS development
 
 COPY ./package.json .
 COPY ./package-lock.json .
-RUN npm ci
+RUN npm i
 
 COPY . .
 

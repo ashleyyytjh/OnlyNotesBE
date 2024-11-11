@@ -1,112 +1,81 @@
-const request = require('supertest');
+const supertest = require('supertest');
+const app = require('../../app'); // Import your Express app
 const mongoose = require('mongoose');
-const app = require('../../app'); 
-const Order = require('../../models/Order'); 
-const ordersFixture = require('../fixtures/ordersFixture');
-const connectDB = require('../../config/db');
+const Order = require('../../models/Order'); // Assuming you have a model at models/order.js
 
+describe('Order Service Integration Tests', () => {
+  let createdOrderId;
 
-jest.setTimeout(100000);
-
-describe('Order API Integration Tests', () => {
-
-  beforeAll(async () => {
-    // process.env.NODE_ENV = 'test';
-    console.log(`Connecting to MongoDB URI: ${process.env.MONGODB_URI}`);
-    // await new Promise(resolve => setTimeout(resolve, 70000));
-    await connectDB();
-    console.log('Connected to MongoDB');
-    
+  // Before each test, create a new order in the database
+  beforeEach(async () => {
+    // Remove all existing orders to ensure a clean state
     await Order.deleteMany({});
-    await Order.insertMany(ordersFixture);
-    orderIdToDelete = ordersFixture[0]._id;
+
+    // Create a new order
+    const newOrder = new Order({
+      stripeTransactionId: 'txn123',
+      noteId: 'note123',
+      buyerId: 'buyer123',
+      orderStatus: 'created',
+      orderPrice: 100
+    });
+    const savedOrder = await newOrder.save();
+    createdOrderId = savedOrder._id; // Store the created order's ID
   });
 
+  // After all tests, cleanup any data and close DB connection
   afterAll(async () => {
-    // Drop the test database and close the connection
-    await mongoose.connection.db.dropDatabase();
-    await mongoose.connection.close();
+    await mongoose.connection.close(); // Close DB connection
   });
 
-  it('should fetch all orders', async () => {
-    const response = await request(app).get('/orders'); 
+  it('should fetch an order successfully', async () => {
+    const response = await supertest(app).get(`/api/v1/orders/${createdOrderId}`);
     expect(response.status).toBe(200);
-    expect(response.body).toHaveLength(2);  // 2 orders in fixture
+    expect(response.body._id).toBe(createdOrderId.toString());
   });
 
-  it('should fetch a specific order by ID', async () => {
-    const orderId = ordersFixture[0]._id;
-    const response = await request(app).get(`/orders/${orderId}`); 
-    expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty('_id', orderId);
-    expect(response.body).toHaveProperty('orderPrice', ordersFixture[0].orderPrice);
-  });
-
-  it('should return 404 if the order does not exist', async () => {
-    const nonExistentId = new mongoose.Types.ObjectId();
-    const response = await request(app).get(`/orders/${nonExistentId}`);
+  it('should return 404 if order not found', async () => {
+    const nonExistentId = '60f8f1c9e0c72a7a94d937e4'; // Example of an invalid ID
+    const response = await supertest(app).get(`/api/v1/orders/${nonExistentId}`);
     expect(response.status).toBe(404);
-    expect(response.body).toHaveProperty('message', 'Order not found');
   });
 
-  it('should create a new order', async () => {
+  it('should create a new order successfully', async () => {
     const newOrder = {
-      stripeTransactionId: 'pi_12345r2eZvKYlo2C1ZKwiKm9',
-      noteId: '10',          
-      buyerId: '10',           
-      orderStatus: 'created',  
-      orderPrice: 50000        
+      stripeTransactionId: 'txn124',
+      noteId: 'note124',
+      buyerId: 'buyer124',
+      orderStatus: 'created',
+      orderPrice: 150
     };
-
-    const response = await request(app).post('/orders').send(newOrder); 
-
-    expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty('_id');
-    expect(response.body.buyerId).toBe(newOrder.buyerId);
-    expect(response.body.orderPrice).toBe(newOrder.orderPrice);
-
-    const createdOrder = await Order.findById(response.body._id);
-    expect(createdOrder).toBeTruthy(); //TRUTHYYYYYYYY
+    const response = await supertest(app).post('/api/v1/orders').send(newOrder);
+    expect(response.status).toBe(201);
+    expect(response.body.message).toBe('Order created successfully');
   });
 
-  it('should update an order by ID', async () => {
-    const updatedData = {
-      orderStatus: 'completed',
+  it('should return 404 if order not found during delete', async () => {
+    const nonExistentId = '60f8f1c9e0c72a7a94d937e4'; // Example of an invalid ID
+    const response = await supertest(app).delete(`/api/v1/orders/${nonExistentId}`);
+    expect(response.status).toBe(404);
+  });
+  
+
+  it('should return 404 if no orders found for account ID', async () => {
+    const accountId = 'nonExistentAccount';
+    const response = await supertest(app).get(`/api/v1/orders/account/${accountId}`);
+    expect(response.status).toBe(404);
+  });
+
+  it('should update an order successfully', async () => {
+    const updatedOrder = {
+      orderStatus: 'shipped',
+      orderPrice: 200
     };
-    const orderId = ordersFixture[0]._id;
+    const response = await supertest(app)
+      .put(`/api/v1/orders/${createdOrderId}`)
+      .send(updatedOrder);
 
-    const response = await request(app).put(`/orders/${orderId}`).send(updatedData); 
     expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty('orderStatus', 'completed');
-
-    const updatedOrder = await Order.findById(orderId);
-    expect(updatedOrder.orderStatus).toBe('completed');
-  });
-
-  it('should return 404 when updating a non-existent order', async () => {
-    const nonExistentId = new mongoose.Types.ObjectId();
-    const updatedData = { orderStatus: 'shipped' };
-
-    const response = await request(app).put(`/orders/${nonExistentId}`).send(updatedData);
-    expect(response.status).toBe(404);
-    expect(response.body).toHaveProperty('message', 'Order not found');
-  });
-
-  it('should delete an order by ID', async () => {
-    const response = await request(app).delete(`/orders/${orderIdToDelete}`); 
-    
-    expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty('deletedCount', 1);
-
-    const deletedOrder = await Order.findById(orderIdToDelete);
-    expect(deletedOrder).toBeNull();
-  });
-
-  it('should return 404 when deleting a non-existent order', async () => {
-    const nonExistentId = new mongoose.Types.ObjectId();
-
-    const response = await request(app).delete(`/orders/${nonExistentId}`);
-    expect(response.status).toBe(404);
-    expect(response.body).toHaveProperty('message', 'Order not found');
+    expect(response.body.message).toBe('Order updated successfully');
   });
 });

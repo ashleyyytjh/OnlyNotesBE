@@ -4,7 +4,7 @@ resource "aws_cognito_user_pool_domain" "onlynotes_user-pool-client-domain" {
   user_pool_id = aws_cognito_user_pool.onlynotes_user-pool.id
   certificate_arn = var.arn-acm_cognito-domain
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 
 }
@@ -17,6 +17,6 @@ resource "aws_route53_record" "www" {
 
   records = [aws_cognito_user_pool_domain.onlynotes_user-pool-client-domain.cloudfront_distribution_arn]
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 }

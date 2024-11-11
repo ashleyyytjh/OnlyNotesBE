@@ -221,7 +221,7 @@ resource "aws_lb_target_group" "verify_tg" {
     interval            = 120
     matcher             = "200"
     path                = "/health"
-    port                = 5000
+    port                = "traffic-port"
     protocol            = "HTTP"
     timeout             = 5
     unhealthy_threshold = 2

@@ -69,7 +69,7 @@ resource "aws_cognito_user_pool" "onlynotes_user-pool" {
 
   verification_message_template {
     default_email_option  = "CONFIRM_WITH_LINK"
-    email_message_by_link = "Please click {##Verify Email##} to verify your email address. \nIf you did not perform this action, ignore this email.\n\nWagwan my G"
+    email_message_by_link = "Please click {##Verify Email##} to verify your email address. \nIf you did not perform this action, ignore this email."
     email_subject_by_link = "OnlyNotes verification"
   }
 

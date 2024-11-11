@@ -44,7 +44,7 @@ VERIFIER_ASSISTANT_ID = os.getenv("VERIFIER_ASSISTANT_ID")
 VECTOR_STORE_ID = os.getenv("VECTOR_STORE_ID")
 
 # Specify global variables
-API_HEADER = '/api'
+API_HEADER = '/api/v1'
 UPLOAD_FOLDER = os.getcwd() + '/uploads'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'json', 'xlsx', 'doc', 'docx', 'ppt', 'pptx'}
 MAX_COMPLETION_TOKENS = 200
@@ -65,7 +65,7 @@ app = Flask(__name__)
 CORS(app)
 
 
-@app.route(API_HEADER + "/health")
+@app.route("/health")
 def health_check():
     logging.info("health check")
     return jsonify({"message": "Verify Service is healthy"}), 200

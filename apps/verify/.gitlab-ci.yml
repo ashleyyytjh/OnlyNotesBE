@@ -14,7 +14,7 @@ variables:
   IMAGE: "$CI_REGISTRY_IMAGE:$SERVICE-$CI_COMMIT_REF_SLUG"
   SERVICE_NAME: verify-ecs-staging-2
   TASK_DEFINITION_NAME: verify-ecs-task-staging
-  SERVICE_NAME_PROD: verify-ecs-production
+  SERVICE_NAME_PROD: verify-ecs-lb-production
   TASK_DEFINITION_NAME_PROD: verify-ecs-task-production
 
 include:

@@ -1,7 +1,7 @@
 resource "aws_lb_listener_rule" "request_rule" {
 
   listener_arn = aws_lb_listener.onlynotes_lb_listener.arn
-  priority     = 1000
+  priority     = 1004
   tags = {}
   tags_all = {}
 
@@ -29,10 +29,10 @@ resource "aws_lb_listener_rule" "request_rule" {
   }
 }
 
-
+#
 resource "aws_lb_listener_rule" "account_rule" {
   listener_arn = aws_lb_listener.onlynotes_lb_listener.arn
-  priority     = 1002
+  priority     = 1001
   tags = {}
   tags_all = {}
 
@@ -65,7 +65,7 @@ resource "aws_lb_listener_rule" "account_rule" {
 
 resource "aws_lb_listener_rule" "notes_rule" {
   listener_arn = aws_lb_listener.onlynotes_lb_listener.arn
-  priority     = 1003
+  priority     = 1002
   tags = {}
   tags_all = {}
 
@@ -96,7 +96,7 @@ resource "aws_lb_listener_rule" "notes_rule" {
 
 resource "aws_lb_listener_rule" "orders_rule" {
   listener_arn = aws_lb_listener.onlynotes_lb_listener.arn
-  priority     = 1004
+  priority     = 1003
   tags = {}
   tags_all = {}
 

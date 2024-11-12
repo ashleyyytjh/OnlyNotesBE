@@ -21,10 +21,10 @@ resource "aws_lb" "onlynotes-alb" {
 }
 
 resource "aws_acm_certificate" "onlynotes_lb_cert" {
-  domain_name   = "apis.onlynotes.net"
+  domain_name   = "api.onlynotes.net"
   key_algorithm = "RSA_2048"
   subject_alternative_names = [
-    "apis.onlynotes.net",
+    "api.onlynotes.net",
   ]
   options {
     certificate_transparency_logging_preference = "ENABLED"
@@ -44,6 +44,7 @@ resource "aws_lb_listener" "onlynotes_lb_listener" {
   default_action {
     order = 1
     type  = "forward"
+    target_group_arn = "arn:aws:elasticloadbalancing:ap-southeast-1:211125709264:targetgroup/temp-production/0ce9fe761af61d53"
 
     forward {
       stickiness {
@@ -51,7 +52,7 @@ resource "aws_lb_listener" "onlynotes_lb_listener" {
         enabled  = false
       }
       target_group {
-        arn    = "arn:aws:elasticloadbalancing:ap-southeast-1:211125709264:targetgroup/temp/9db0d7f51b6192b8"
+        arn    = "arn:aws:elasticloadbalancing:ap-southeast-1:211125709264:targetgroup/temp-production/0ce9fe761af61d53"
         weight = 1
       }
     }

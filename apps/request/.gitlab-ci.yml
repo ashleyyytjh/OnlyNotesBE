@@ -171,7 +171,7 @@ ecs-production:
     - aws ecs update-service --region "${AWS_DEFAULT_REGION}" --cluster "${PRODUCTION_CLUSTER_NAME}" --service "${SERVICE_NAME_PROD}"  --task-definition "${TASK_DEFINITION_NAME_PROD}"
     - echo "Finish updating Task:${TASK_DEFINITION_NAME_PROD} Service:${SERVICE_NAME_PROD} Cluster:${PRODUCTION_CLUSTER_NAME} with image:${ECR_REGISTRY}:${VERSION}"
   dependencies:
-    - account-build
+    - request-build
   when: manual
   allow_failure: true
   needs: []

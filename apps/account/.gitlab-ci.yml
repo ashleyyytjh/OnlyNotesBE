@@ -173,4 +173,5 @@ ecs-production:
     - account-build
   when: manual
   allow_failure: true
-  optional: true
+  needs:
+    optional: true

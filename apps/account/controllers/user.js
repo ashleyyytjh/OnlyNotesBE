@@ -17,7 +17,7 @@ async function getSessionData(req, res){
 
         const session = {
             id: accessToken.sub,
-            username: accessToken.username,
+            username: accessToken.username + "-cs302",
             email: idToken.email
         }
         // console.log(session)

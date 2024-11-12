@@ -87,10 +87,6 @@ public class NotesServiceImpl implements NotesService {
 
     @Override
     public Response getAllNotesByCategoryCodeAndStatusIn(String categoryCode, List<String> status, int pageNum, int limit) {
-        if (pageNum < 0 || limit < 1) {
-            logger.warn("Page number / limit cannot be less than 0.");
-            throw new InvalidPageableException();
-        }
         Pageable paging = PageRequest.of(pageNum, limit);
         Page<Notes> page = notesRepository.findByStatusInAndCategoryCode(status, categoryCode, paging);
         return MultiNotesResponse.builder()

@@ -55,14 +55,14 @@ trigger_verify:
     - changes:
         - apps/verify/**/*
 
-trigger_iac:
-  stage: trigger
-  trigger:
-    include: infra/iac/.gitlab-ci.yml
-    strategy: depend
-  rules:
-    - changes:
-        - infra/iac/**/*
+# trigger_iac:
+#   stage: trigger
+#   trigger:
+#     include: infra/iac/.gitlab-ci.yml
+#     strategy: depend
+#   rules:
+#     - changes:
+#         - infra/iac/**/*
 
 
 success_notification:

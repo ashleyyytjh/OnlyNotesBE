@@ -17,6 +17,7 @@ from openai import APIConnectionError, InternalServerError, OpenAI
 
 from opentelemetry import trace
 from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
+from opentelemetry.sdk.trace import SpanProcessor, Span
 
 from flask_cors import CORS
 

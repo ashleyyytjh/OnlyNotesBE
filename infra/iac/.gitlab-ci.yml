@@ -14,7 +14,7 @@ terrascan:
     entrypoint: ["/bin/sh", "-c"]
   stage: scan
   script:
-    - /go/bin/terrascan scan -i terraform -o json .
+    - /go/bin/terrascan scan -i terraform -o json . > terrascan_report.json
     - |
       EXIT_CODE=$?
       if [ $EXIT_CODE -eq 3 ]; then
@@ -28,6 +28,9 @@ terrascan:
         exit 5
       fi
   allow_failure: false
+  artifacts:
+    paths:
+      - terrascan_report.json
   after_script:
     - |
       if [ "$CI_JOB_STATUS" == "failed" ]; then

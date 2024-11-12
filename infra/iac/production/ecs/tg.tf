@@ -4,7 +4,7 @@ resource "aws_lb_target_group" "request_tg" {
   load_balancing_algorithm_type     = "round_robin"
   load_balancing_anomaly_mitigation = "off"
   load_balancing_cross_zone_enabled = "use_load_balancer_configuration"
-  name                              = "request-ecs-lb-staging"
+  name                              = "request-ecs-lb-production"
   name_prefix                       = null
   port                              = 80
   protocol                          = "HTTP"
@@ -53,7 +53,7 @@ resource "aws_lb_target_group" "account_tg" {
   load_balancing_algorithm_type     = "round_robin"
   load_balancing_anomaly_mitigation = "off"
   load_balancing_cross_zone_enabled = "use_load_balancer_configuration"
-  name                              = "account-ecs-lb-staging"
+  name                              = "account-ecs-lb-production"
   name_prefix                       = null
   port                              = 80
   protocol                          = "HTTP"
@@ -104,7 +104,7 @@ resource "aws_lb_target_group" "notes_tg" {
   load_balancing_algorithm_type     = "round_robin"
   load_balancing_anomaly_mitigation = "off"
   load_balancing_cross_zone_enabled = "use_load_balancer_configuration"
-  name                              = "notes-ecs-lb-staging"
+  name                              = "notes-ecs-lb-production"
   name_prefix                       = null
   port                              = 80
   protocol                          = "HTTP"
@@ -155,7 +155,7 @@ resource "aws_lb_target_group" "orders_tg" {
   load_balancing_algorithm_type     = "round_robin"
   load_balancing_anomaly_mitigation = "off"
   load_balancing_cross_zone_enabled = "use_load_balancer_configuration"
-  name                              = "orders-ecs-lb-staging"
+  name                              = "orders-ecs-lb-production"
   name_prefix                       = null
   port                              = 80
   protocol                          = "HTTP"
@@ -205,7 +205,7 @@ resource "aws_lb_target_group" "verify_tg" {
   load_balancing_algorithm_type     = "round_robin"
   load_balancing_anomaly_mitigation = "off"
   load_balancing_cross_zone_enabled = "use_load_balancer_configuration"
-  name                              = "verify-ecs-lb-staging"
+  name                              = "verify-ecs-lb-production"
   port                              = 80
   protocol                          = "HTTP"
   protocol_version                  = "HTTP1"

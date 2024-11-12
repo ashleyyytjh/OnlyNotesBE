@@ -8,6 +8,7 @@ resource "aws_cognito_user_pool" "onlynotes_user-pool" {
       priority = "1"
     }
   }
+  
 
   admin_create_user_config {
     allow_admin_create_user_only = "false"

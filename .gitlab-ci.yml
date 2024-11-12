@@ -20,10 +20,6 @@ trigger_account:
   rules:
     - changes:
         - apps/account/**/*
-  needs:
-    - project: apps/account
-      job: ecs-production
-      optional: true
 
 
 trigger_notes:

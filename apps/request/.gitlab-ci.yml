@@ -5,6 +5,7 @@ stages:
   - push
   - staging
   - notification
+  - production
 
 variables:
   SERVICE: "request"
@@ -13,6 +14,8 @@ variables:
   IMAGE: "$CI_REGISTRY_IMAGE:$SERVICE-$CI_COMMIT_REF_SLUG"
   SERVICE_NAME: request-ecs-staging-2
   TASK_DEFINITION_NAME: request-ecs-task-staging
+  SERVICE_NAME_PROD: request-ecs-production
+  TASK_DEFINITION_NAME_PROD: request-ecs-task-production
 
 # Jest tests
 request-unit-tests:
@@ -134,3 +137,41 @@ failure_notification:
     - ./send.sh failure $REQUEST_WEBHOOK_URL
   when: on_failure
   allow_failure: true 
+
+
+
+ecs-production:
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  stage: production
+  before_script:
+    - apk add --no-cache python3 jq py3-pip
+    - pip install awscli
+    - aws --version
+    - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+    - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+    - aws configure set region $AWS_DEFAULT_REGION
+    - $(aws ecr get-login --no-include-email --region "${AWS_DEFAULT_REGION}")
+  script:
+    - echo ${ECR_REGISTRY}:${VERSION}
+    - TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition "$TASK_DEFINITION_NAME_PROD" --region "${AWS_DEFAULT_REGION}")
+    - echo $TASK_DEFINITION
+    - NEW_CONTAINER_DEFINITION=$(echo $TASK_DEFINITION | jq --arg IMAGE_ECR "${ECR_REGISTRY}:${VERSION}" '.taskDefinition.containerDefinitions[0].image = $IMAGE_ECR | .taskDefinition.containerDefinitions[0]')
+    - CPU=$(echo $TASK_DEFINITION | jq -r '.taskDefinition.cpu')
+    - MEMORY=$(echo $TASK_DEFINITION | jq -r '.taskDefinition.memory')
+    - REQUIRES_COMPATIBILITIES=$(echo $TASK_DEFINITION | jq -r '.taskDefinition.requiresCompatibilities')
+    - TASK_ROLE_ARN=$(echo $TASK_DEFINITION | jq -r '.taskDefinition.taskRoleArn')
+    - EXECUTION_ROLE_ARN=$(echo $TASK_DEFINITION | jq -r '.taskDefinition.executionRoleArn')
+    - NETWORK_MODE=$(echo $TASK_DEFINITION | jq -r '.taskDefinition.networkMode')
+    - RUNTIME_PLATFORM=$(echo $TASK_DEFINITION | jq -r '.taskDefinition.runtimePlatform')
+    - echo "Registering new container definition..."
+    - aws ecs register-task-definition --region "${AWS_DEFAULT_REGION}" --family "${TASK_DEFINITION_NAME_PROD}" --container-definitions "${NEW_CONTAINER_DEFINITION}" --cpu "${CPU}" --memory "${MEMORY}" --requires-compatibilities "${REQUIRES_COMPATIBILITIES}" --task-role-arn "${TASK_ROLE_ARN}" --execution-role-arn "${EXECUTION_ROLE_ARN}" --network-mode "${NETWORK_MODE}" --runtime-platform "${RUNTIME_PLATFORM}"
+    - echo "Updating the service..."
+    - aws ecs update-service --region "${AWS_DEFAULT_REGION}" --cluster "${PRODUCTION_CLUSTER_NAME}" --service "${SERVICE_NAME_PROD}"  --task-definition "${TASK_DEFINITION_NAME_PROD}"
+    - echo "Finish updating Task:${TASK_DEFINITION_NAME_PROD} Service:${SERVICE_NAME_PROD} Cluster:${PRODUCTION_CLUSTER_NAME} with image:${ECR_REGISTRY}:${VERSION}"
+  dependencies:
+    - account-build
+  when: manual
+  allow_failure: true
+  needs: []
